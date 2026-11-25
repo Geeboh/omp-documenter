@@ -104,15 +104,19 @@ function parseCommandOptions(words, mode) {
 export default function documenter(pi) {
   if (!pi.zod || typeof pi.registerTool !== "function" || typeof pi.registerCommand !== "function") throw new Error("OMP Documenter requires the OMP extension API with pi.zod, registerTool and registerCommand. Use a compatible OMP release or the standalone Node CLI.");
   const z = pi.zod;
-  pi.registerTool({
-    name: "documenter_state", label: "Documenter", description: "Run deterministic Documenter state operations. Mutating actions write guarded repository state; read-only actions inspect it.", approval: "write",
-    parameters: z.object({ action: z.enum(actions), root: z.string().optional(), inputJson: z.string().optional(), strict: z.boolean().optional() }),
+  const readActions = ["status", "check", "preview", "archives", "doctor", "details", "style"];
+  const writeActions = actions.filter(action => !readActions.includes(action) && !["initial", "maintain"].includes(action));
+  const parameters = allowed => z.object({ action: z.enum(allowed), root: z.string().optional(), inputJson: z.string().optional(), strict: z.boolean().optional() });
+  const registerStateTool = (name, label, approval, allowed) => pi.registerTool({
+    name, label, description: `${label} Documenter operations with ${approval}-classified host approval.`, approval,
+    parameters: parameters(allowed),
     async execute(_id, params, signal, _onUpdate, ctx) {
       try {
         if (signal?.aborted) throw new Error("Documentation operation cancelled before execution.");
         const root = resolveRoot(ctx.cwd, params.root);
         if (params.inputJson && Buffer.byteLength(params.inputJson, "utf8") > 4 * 1024 * 1024) throw new Error("Input JSON exceeds the 4 MiB limit.");
         const input = params.inputJson === undefined ? undefined : JSON.parse(params.inputJson);
+        if (name === "documenter_inspect" && params.action === "style" && input?.operation !== "show") throw new Error("Read-only style inspection accepts operation show only.");
         const result = await runOperation(params.action, { root, input, strict: params.strict ?? false, signal, onUpdate: _onUpdate });
         return { content: [{ type: "text", text: rendered(result) }], details: result, ...(result.ok === false ? { isError: true } : {}) };
       } catch (error) {
@@ -121,6 +125,8 @@ export default function documenter(pi) {
       }
     }
   });
+  registerStateTool("documenter_state", "Documenter", "write", writeActions);
+  registerStateTool("documenter_inspect", "Documenter inspection", "read", readActions);
   pi.registerCommand("documenter", {
     description: "Create, maintain, inspect or overhaul documentation. Supports quoted paths and guarded lifecycle actions.",
     handler: async (args, ctx) => {
