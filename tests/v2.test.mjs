@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { runOperation } from '../lib/engine.mjs';
 
 const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
@@ -118,4 +119,16 @@ test('restore requires live hashes and rejects non-document archive paths', t =>
   manifest.entries[0].path = 'src/app.js';
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
   assert.throws(() => runOperation('restore', { root, input: { archiveId: archived.archiveId, expectedDocumentHashes: { 'src/app.js': sha256('export const answer = 42;\\n') } } }), /Markdown/);
+});
+
+test('excluded observations do not change the source evidence snapshot', t => {
+  const root = fixture(t);
+  put(root, '.gitignore', 'debug.log');
+  spawnSync('git', ['-C', root, 'init', '-q']);
+  spawnSync('git', ['-C', root, 'add', '.']);
+  const before = runOperation('scan-v2', { root });
+  put(root, 'debug.log', 'transient');
+  const after = runOperation('scan-v2', { root });
+  assert.equal(after.inventory.snapshot, before.inventory.snapshot);
+  assert.notEqual(after.inventory.observationSnapshot, before.inventory.observationSnapshot);
 });
