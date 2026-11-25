@@ -171,3 +171,16 @@ test('broken-link diagnostics are item-bounded and retrievable by cursor', t => 
   assert.equal(details.total, 1000);
   assert.equal(details.items.length, 5);
 });
+
+test('fault injection leaves resumable lifecycle state', t => {
+  const root = fixture(t);
+  const planned = runOperation('plan', { root, input: { dest: 'docs/api', style: 'fresh', testFaultAt: 'archive:copy' } });
+  assert.throws(() => runOperation('archive', { root, input: { runId: planned.runId } }), /Injected Documenter fault/);
+  const manifestPath = path.join(root, `.documenter/runs/${planned.runId}/manifest.json`);
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  assert.equal(manifest.status, 'planned');
+  manifest.testFaultAt = null;
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  const archived = runOperation('archive', { root, input: { runId: planned.runId } });
+  assert.equal(archived.verified, true);
+});
