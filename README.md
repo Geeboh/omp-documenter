@@ -70,11 +70,11 @@ Parallel component reviews default to **automatic, with up to three workers plus
 
 ## Compatibility and v2 lifecycle
 
-Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 22.23.5, 24.22.3, and 26.13.1, with 70 tests passing on each. Live OMP workflow qualification remains partial.
+Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 22.23.5, 24.22.3, and 26.13.1, plus Bun 1.4.5. All 70 tests passed. Live OMP workflow qualification remains partial.
 
 The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, and `details` actions. Use the repository-relative lifecycle documented in [the user guide](docs/USER-GUIDE.md) and [the documentation-set reference](docs/DOCUMENTATION-SET.md).
 
-External output, semantic search, automatic section merging, proprietary style formats, and Bun execution are unsupported or unqualified core capabilities. Explicit missing style sources fail visibly.
+External output, semantic search, automatic section merging, and proprietary style formats remain unsupported or unqualified core capabilities. Explicit missing style sources fail visibly.
 
 OMP host integration remains a separate qualification result. Mock-host tests and installed skill discovery do not establish a live workflow run.
 
