@@ -282,3 +282,16 @@ The v2 engine writes repository-local `.documenter/sets.json`, styles, runs,
 archives and generation manifests. External output destinations are rejected.
 The engine does not generate prose. A staged page must be supplied by the
 coordinating documentation workflow and remains subject to exact-byte checks.
+
+## Example and renderer checks
+
+Run explicit examples through argv arrays. The harness does not interpret shell syntax.
+
+```bash
+node scripts/verify-examples.mjs --root "$PWD" --input examples.json --output example-receipt.json
+node scripts/renderer-check.mjs --root "$PWD"
+```
+
+Example receipts record command, working directory, exit status, bounded output and output hash. The harness does not claim network or filesystem sandboxing. Renderer detection reports project configuration; renderer-specific anchors remain unverified until an explicit project check runs.
+
+`scan-v2` also returns bounded JavaScript-family and Python declaration inventories. These are non-exhaustive. Dynamic dispatch, decorators, generated code, reflection and runtime registration remain explicit limitations.

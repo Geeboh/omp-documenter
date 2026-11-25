@@ -132,3 +132,22 @@ test('excluded observations do not change the source evidence snapshot', t => {
   assert.equal(after.inventory.snapshot, before.inventory.snapshot);
   assert.notEqual(after.inventory.observationSnapshot, before.inventory.observationSnapshot);
 });
+
+test('claim dependencies invalidate affected claims without changing unrelated evidence', t => {
+  const root = fixture(t);
+  const scan = runOperation('scan', { root });
+  const source = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
+  const page = fs.readFileSync(path.join(root, 'docs/documenter/guide.md'), 'utf8');
+  const claim = {
+    id: 'answer',
+    text: 'answer is 42.',
+    status: 'supported',
+    evidence: [{ path: 'src/app.js', sha256: sha256(source), startLine: 1, endLine: 1 }],
+    dependencies: [{ path: 'docs/documenter/guide.md', sha256: sha256(page) }],
+    documents: []
+  };
+  runOperation('record', { root, input: { expectedSnapshot: scan.snapshot, claims: [claim] } });
+  fs.writeFileSync(path.join(root, 'docs/documenter/guide.md'), `${page}\\nUpdated.`);
+  const status = runOperation('status', { root });
+  assert.equal(status.coverage.claims.stale, 1);
+});
