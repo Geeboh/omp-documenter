@@ -906,6 +906,18 @@ Example receipts record command, working directory, exit status, bounded output 
 
 `scan-v2` also returns bounded JavaScript-family and Python declaration inventories. These are non-exhaustive. Dynamic dispatch, decorators, generated code, reflection and runtime registration remain explicit limitations.
 
+## Optional expanded capabilities
+
+The expanded release includes deterministic, guarded optional adapters:
+
+```bash
+node scripts/optional-capabilities.mjs search search.json
+node scripts/optional-capabilities.mjs merge merge.json
+node scripts/optional-capabilities.mjs external external-output.json
+```
+
+Search is lexical fallback with evidence links, not embedding proof. Merge is heading-identity three-way merge with explicit conflicts. External output requires `allowExternalOutput: true`, rejects traversal and overwrite, and reports per-file atomicity limits.
+
 ## Canonical source: docs/VALIDATION.md
 
 # Validation and limits
