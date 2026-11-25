@@ -239,3 +239,47 @@ Only one cooperating engine writer can hold `.documenter/write.lock`. Parallel r
 Writes use a temporary file, synchronization and atomic replacement or an exclusive new-file operation. Replacements save prior page bytes in a journal. Page content and its ownership/ledger records are separate filesystem writes, so a crash can leave a prepared journal. Inspect the journal, current hashes and protected content before a deliberate repair.
 
 The path checks protect ordinary workflows but do not form a sandbox against an adversarial process racing filesystem changes. An external editor can still change files outside the cooperative lock. Current hashes are checked again where implemented, and the final run must include a fresh integrity check.
+
+## V2 lifecycle actions
+
+Documenter 2.0.0 keeps the five v1 actions and adds guarded lifecycle actions:
+`preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`,
+`resume`, `archives`, `restore`, `page`, `style`, `doctor` and `details`.
+
+Preview is read-only. It resolves the repository-relative destination, exact
+front-page policy and Existing/Fresh style without creating state. A planned
+run records source and document hashes, style identity, destination, selected
+pages and an idempotency key. Archive, stage, validate and promote are separate
+durable transitions. Promotion refuses source or document drift and records a
+per-page journal.
+
+Example:
+
+```bash
+node scripts/documenter.mjs preview --root "$PWD" --dest "Project Documentation" --frontpage all
+node scripts/documenter.mjs plan --root "$PWD" --dest docs --frontpage root --style fresh
+```
+
+Create the staged page input as JSON. The `path` must be inside the planned
+destination.
+
+```json
+{"pages":[{"path":"docs/README.md","content":"# Project\n"}]}
+```
+
+Then run:
+
+```bash
+node scripts/documenter.mjs stage --root "$PWD" --run-id RUN_ID --input staged.json
+node scripts/documenter.mjs validate --root "$PWD" --run-id RUN_ID
+node scripts/documenter.mjs promote --root "$PWD" --run-id RUN_ID
+```
+Use the returned `runId` with `archive`, `stage`, `validate`, `promote` and
+`resume`. Use `archives` to inspect verified originals and `restore` with an
+explicit archive ID. `page` supports `accept`, `release`, `rename` and
+`retire`; `style` supports `show`, `import` and `refresh`.
+
+The v2 engine writes repository-local `.documenter/sets.json`, styles, runs,
+archives and generation manifests. External output destinations are rejected.
+The engine does not generate prose. A staged page must be supplied by the
+coordinating documentation workflow and remains subject to exact-byte checks.
