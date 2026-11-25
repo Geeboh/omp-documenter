@@ -147,6 +147,8 @@ test('claim dependencies invalidate affected claims without changing unrelated e
     documents: []
   };
   runOperation('record', { root, input: { expectedSnapshot: scan.snapshot, claims: [claim] } });
+  const indexes = JSON.parse(fs.readFileSync(path.join(root, '.documenter/indexes.json'), 'utf8'));
+  assert.deepEqual(indexes.sourceToClaims['docs/documenter/guide.md'], ['answer']);
   fs.writeFileSync(path.join(root, 'docs/documenter/guide.md'), `${page}\\nUpdated.`);
   const status = runOperation('status', { root });
   assert.equal(status.coverage.claims.stale, 1);
