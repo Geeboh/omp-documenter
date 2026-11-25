@@ -23,12 +23,17 @@ const valueFields = {
 const help = `OMP Documenter 2.0.0
 
 Usage:
-  node scripts/documenter.mjs scan|status|check --root PATH [--strict]
+  node scripts/documenter.mjs scan|status --root PATH
+  node scripts/documenter.mjs check --root PATH [--strict]
   node scripts/documenter.mjs record|publish --root PATH --input FILE
   node scripts/documenter.mjs initial|maintain|overhaul --root PATH [options]
-  node scripts/documenter.mjs preview|plan|archive|stage|validate|promote|resume --root PATH [options]
+  node scripts/documenter.mjs preview|plan --root PATH [options]
+  node scripts/documenter.mjs archive|validate|promote|resume --root PATH --run-id RUN_ID
+  node scripts/documenter.mjs stage --root PATH --run-id RUN_ID --input FILE
+  node scripts/documenter.mjs restore --root PATH --archive-id ARCHIVE_ID [--dry-run]
   node scripts/documenter.mjs archives|doctor|details --root PATH [options]
-  node scripts/documenter.mjs page|style --root PATH --operation OP [options]
+  node scripts/documenter.mjs page --root PATH --operation OP --path PAGE [--new-path PAGE]
+  node scripts/documenter.mjs style --root PATH --operation show|import|refresh [--source PATH]
 
 Options:
   --set ID, --dest PATH, --frontpage none|root|all

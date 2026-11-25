@@ -16,6 +16,8 @@ Version 2.0.0 · 26 November 2026
 10. [Git workflow](#10-git-workflow)
 11. [Troubleshoot and recover](#11-troubleshoot-and-recover)
 12. [Definition of a useful completed run](#12-definition-of-a-useful-completed-run)
+13. [Rebuild a documentation set](#13-rebuild-a-documentation-set)
+14. [Manage pages and recover](#14-manage-pages-and-recover)
 
 ## 1. What Documenter does
 
@@ -32,7 +34,7 @@ Documenter does not need an external documentation service or database. Its loca
 ### Prerequisites
 
 - An existing OMP installation supporting the extension interfaces listed in [validation](VALIDATION.md).
-- Node.js 20 or later for the supplied installer, standalone CLI and package tests.
+- Node.js 22 or later for the supplied installer, standalone CLI and package tests.
 - Read access to the repository, and write access to the chosen documentation and state directories.
 - Git available on `PATH` when the target is a Git repository. Non-Git folders are supported with a filesystem inventory.
 
@@ -46,12 +48,12 @@ git --version
 
 ### Install from the self-contained installer
 
-The distribution includes `omp-documenter-1.0.0-install.mjs`. It contains the package files and their hashes. It writes to a new directory, verifies the contents, and does not contact the network or change OMP settings.
+The distribution includes `omp-documenter-2.0.0-install.mjs`. It contains the package files and their hashes. It writes to a new directory, verifies the contents, and does not contact the network or change OMP settings.
 
 Run this from the directory where you downloaded the installer:
 
 ```bash
-node ./omp-documenter-1.0.0-install.mjs "$HOME/.local/share/omp-documenter-1.0.0"
+node ./omp-documenter-2.0.0-install.mjs "$HOME/.local/share/omp-documenter-2.0.0"
 ```
 
 The installer refuses an existing destination so it cannot overwrite a previous installation. If the chosen directory already exists, inspect it and choose a new destination. Keep the installed directory outside the repository being documented.
@@ -59,7 +61,7 @@ The installer refuses an existing destination so it cannot overwrite a previous 
 Link the package to OMP:
 
 ```bash
-omp plugin link "$HOME/.local/share/omp-documenter-1.0.0"
+omp plugin link "$HOME/.local/share/omp-documenter-2.0.0"
 ```
 
 Start a new OMP session from the repository root:
@@ -77,7 +79,7 @@ If you do not want a persistent plugin link, load the entire package directory f
 
 ```bash
 cd /path/to/your/project
-omp --extension "$HOME/.local/share/omp-documenter-1.0.0"
+omp --extension "$HOME/.local/share/omp-documenter-2.0.0"
 ```
 
 Use the package directory so OMP can discover the bundled skill. Loading only `src/index.js` is not the recommended installation method.
@@ -362,8 +364,7 @@ External output, semantic search, proprietary reference adapters, and automatic 
 
 ## 14. Manage pages and recover
 
-Accept a reviewed manual correction, release a page to human management, rename it with history, or retire it without erasing the page bytes:
-
+Accept only after an independent page review has checked the current bytes and affected claims. The deterministic engine records the accepted hash; it does not supply semantic review itself.
 ```bash
 node scripts/documenter.mjs page --root "$PWD" --operation accept --path docs/guide.md --expected-sha256 HASH
 node scripts/documenter.mjs page --root "$PWD" --operation release --path docs/guide.md --expected-sha256 HASH

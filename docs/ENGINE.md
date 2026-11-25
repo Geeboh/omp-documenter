@@ -50,7 +50,7 @@ node /absolute/plugin/scripts/documenter.mjs publish --root /absolute/repository
 node /absolute/plugin/scripts/documenter.mjs check --root /absolute/repository --strict
 ```
 
-`record` and `publish` require `--input`. The CLI accepts a regular JSON input file of at most 4 MiB. The agent tool imposes the same size limit on its serialized input. Exit status is 0 for successful operations, 1 for errors, and 2 for a failed check or a protected-content publishing conflict.
+`record` and `publish` require `--input`. The standalone CLI accepts a regular JSON input file of at most 16 MiB. The OMP tool limits serialized `inputJson` to 4 MiB. Exit status is 0 for successful operations, 1 for errors, and 2 for a failed check or a protected-content publishing conflict.
 
 ## State files
 
@@ -260,8 +260,7 @@ node scripts/documenter.mjs preview --root "$PWD" --dest "Project Documentation"
 node scripts/documenter.mjs plan --root "$PWD" --dest docs --frontpage root --style fresh
 ```
 
-Create the staged page input as JSON. The `path` must be inside the planned
-destination.
+Create the staged page input as JSON. A path must be inside the planned destination or be an exact selected front page in the immutable plan.
 
 ```json
 {"pages":[{"path":"docs/README.md","content":"# Project\n"}]}

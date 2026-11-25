@@ -24,12 +24,12 @@ Use the v2 contract commands from the repository root:
 
 ```text
 /documenter doctor
-/documenter resume RUN_ID
+/documenter resume --run-id RUN_ID
 /documenter archives
-/documenter restore ARCHIVE_ID
+/documenter restore --archive-id ARCHIVE_ID
 ```
 
-`doctor` reports lock evidence and incomplete operations. It does not remove a lock automatically. `resume` derives its destination from the immutable run manifest, reconciles the journal with current bytes, and rechecks guards before each transition. `restore` creates a new restoration run. It does not erase the run that produced the current generation.
+`doctor` reports lock evidence and incomplete operations. It does not remove a lock automatically. `resume` derives its destination from the immutable run manifest and continues only from the stored run phase. Promotion rechecks each selected live hash. Full journal classification across an interrupted promotion remains a qualification gap. `restore` creates a new restoration run. It does not erase the run that produced the current generation.
 
 Before resuming, inspect the run manifest, events, staged files, validation receipt, journal, and current page hashes. Preserve a newer human edit when the expected hash no longer matches. Resolve the conflict through the ownership workflow.
 

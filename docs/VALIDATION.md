@@ -3,7 +3,7 @@
 ## Current v2 candidate
 
 - Package version: 2.0.0.
-- Candidate working revision: see `.overhaul/documenter-v2/work/RELEASE-EVIDENCE.md`.
+- Candidate working revision: see the workspace-only `.overhaul/documenter-v2/work/RELEASE-EVIDENCE.md`; release artifacts are generated separately and `.overhaul` is not shipped.
 - Runtime: Node.js v24.22.3 on Linux x64.
 - Runtime dependencies: Node built-ins; Git for Git-repository fixtures.
 - Automated suite: `npm test`.

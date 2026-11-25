@@ -79,3 +79,27 @@ test('explicit destination values preserve quoted-path semantics at the engine b
   assert.equal(result.set.destination, 'Project Documentation');
   assert.throws(() => runOperation('preview', { root, input: { style: 'fresh', styleFrom: 'guide.md' } }), /STYLE_SELECTION_CONFLICT|choose one/i);
 });
+
+test('front-page manifest permits selected root entry pages during staging', t => {
+  const root = fixture(t);
+  put(root, 'README.md', '# Root\\n');
+  const planned = runOperation('plan', { root, input: { dest: 'docs/api', frontpage: 'root', style: 'fresh' } });
+  runOperation('archive', { root, input: { runId: planned.runId } });
+  const staged = runOperation('stage', { root, input: { runId: planned.runId, pages: [{ path: 'README.md', content: '# Updated root\\n' }] } });
+  assert.equal(staged.ok, true);
+});
+
+test('resume reconciles a promotion checkpoint from observed live hashes', t => {
+  const root = fixture(t);
+  const planned = runOperation('plan', { root, input: { dest: 'docs/api', style: 'fresh' } });
+  runOperation('archive', { root, input: { runId: planned.runId } });
+  runOperation('stage', { root, input: { runId: planned.runId, pages: [{ path: 'docs/api/api.md', content: '# API\\n' }] } });
+  runOperation('validate', { root, input: { runId: planned.runId } });
+  const manifestPath = path.join(root, `.documenter/runs/${planned.runId}/manifest.json`);
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  manifest.status = 'promoting';
+  manifest.candidateGenerationId = 'resume-generation';
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  const resumed = runOperation('resume', { root, input: { runId: planned.runId } });
+  assert.equal(resumed.status, 'active');
+});
