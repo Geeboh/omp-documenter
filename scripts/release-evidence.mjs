@@ -78,6 +78,15 @@ function sourceRevision(root) {
   return revision;
 }
 
+function workingTree(root) {
+  const status = gitOutput(root, ["status", "--porcelain=v1", "--untracked-files=all"]);
+  return {
+    dirty: Boolean(status),
+    status,
+    digest: crypto.createHash("sha256").update(status).digest("hex")
+  };
+}
+
 function generatedAt(root) {
   const reproducible = process.env.SOURCE_DATE_EPOCH;
   if (reproducible !== undefined) {
@@ -149,6 +158,7 @@ export function createReleaseEvidence({ root = process.cwd() } = {}) {
     schemaVersion: 2,
     productVersion,
     sourceCommit: revision,
+    workingTree: workingTree(repositoryRoot),
     generatedAt: generatedAt(repositoryRoot),
     implementationStatus: "checkpointed",
     qualificationStatus: "not-qualified",

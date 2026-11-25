@@ -103,3 +103,19 @@ test('resume reconciles a promotion checkpoint from observed live hashes', t => 
   const resumed = runOperation('resume', { root, input: { runId: planned.runId } });
   assert.equal(resumed.status, 'active');
 });
+
+test('restore requires live hashes and rejects non-document archive paths', t => {
+  const root = fixture(t);
+  const planned = runOperation('plan', { root, input: { dest: 'docs/documenter', style: 'fresh' } });
+  const archived = runOperation('archive', { root, input: { runId: planned.runId } });
+  const pagePath = path.join(root, 'docs/documenter/guide.md');
+  fs.writeFileSync(pagePath, '# Human edit\\n');
+  assert.throws(() => runOperation('restore', { root, input: { archiveId: archived.archiveId } }), /expectedDocumentHashes/);
+  const restored = runOperation('restore', { root, input: { archiveId: archived.archiveId, expectedDocumentHashes: { 'docs/documenter/guide.md': sha256('# Human edit\\n') } } });
+  assert.equal(restored.ok, true);
+  const manifestPath = path.join(root, `.documenter/archives/${archived.archiveId}/manifest.json`);
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  manifest.entries[0].path = 'src/app.js';
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  assert.throws(() => runOperation('restore', { root, input: { archiveId: archived.archiveId, expectedDocumentHashes: { 'src/app.js': sha256('export const answer = 42;\\n') } } }), /Markdown/);
+});
