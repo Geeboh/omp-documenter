@@ -4,6 +4,7 @@
   "description": "Evidence-led repository documentation, maintenance, coverage and safe publishing for Oh My Pi",
   "type": "module",
   "private": true,
+  "license": "MIT",
   "engines": { "node": ">=22" },
   "omp": { "extensions": ["./src/index.js"] },
   "bin": { "omp-documenter": "./scripts/documenter.mjs" },

@@ -8,7 +8,7 @@
 - Added combined-guide and release-evidence generators.
 - Raised the runtime minimum from Node.js 20 to Node.js 22.
 
-Local implementation qualification passed on Node.js 24.22.3. Node.js 22, Node.js 26, and live OMP qualification remain unrun.
+Local implementation qualification passed on Node.js 22.23.5, 24.22.3, and 26.13.1. MIT licensing is declared in `LICENSE`. Live OMP workflow qualification remains partial.
 
 ## 1.0.0 — 16 November 2026
 

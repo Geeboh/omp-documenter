@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const packageRoot = fileURLToPath(new URL("../", import.meta.url));
 const sha256 = value => crypto.createHash("sha256").update(value).digest("hex");
-const included = ["package.json", "README.md", "CHANGELOG.md", ".gitignore", "src", "lib", "scripts", "skills", "templates", "docs", "tests"];
+const included = ["package.json", "README.md", "CHANGELOG.md", "LICENSE", ".gitignore", "src", "lib", "scripts", "skills", "templates", "docs", "tests"];
 
 export function collectPackage(root = packageRoot) {
   const files = [];

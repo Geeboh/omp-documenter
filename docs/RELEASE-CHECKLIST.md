@@ -8,7 +8,7 @@ Use this checklist to separate pack evidence, product checks, host qualification
 - [ ] Record handoff pack version `1.0.0` separately from product version.
 - [ ] Record working-tree state and every artifact hash.
 - [ ] State implemented core, optional adapters, and unsupported scope.
-- [ ] Record the actual licence and third-party provenance decision. Do not invent one.
+- [x] Licence selected as MIT in `LICENSE`; third-party provenance remains explicit.
 
 Generate a metadata skeleton from repository facts:
 
