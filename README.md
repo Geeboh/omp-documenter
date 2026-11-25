@@ -70,7 +70,7 @@ Parallel component reviews default to **automatic, with up to three workers plus
 
 ## Compatibility and v2 lifecycle
 
-Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 24.22.3 and passed 56 tests. Node.js 22, Node.js 26, and live OMP workflow qualification remain unrun.
+Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 24.22.3 and passed 63 tests. Node.js 22, Node.js 26, and live OMP workflow qualification remain unrun.
 
 The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, and `details` actions. Use the repository-relative lifecycle documented in [the user guide](docs/USER-GUIDE.md) and [the documentation-set reference](docs/DOCUMENTATION-SET.md).
 
