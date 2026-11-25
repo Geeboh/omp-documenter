@@ -85,7 +85,7 @@ Parallel component reviews default to **automatic, with up to three workers plus
 
 ## Compatibility and v2 lifecycle
 
-Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 24.22.3 and passed 70 tests. Node.js 22, Node.js 26, and live OMP workflow qualification remain unrun.
+Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 22.23.5, 24.22.3, and 26.13.1, with 70 tests passing on each. Live OMP workflow qualification remains partial.
 
 The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, and `details` actions. Use the repository-relative lifecycle documented in [the user guide](USER-GUIDE.md) and [the documentation-set reference](DOCUMENTATION-SET.md).
 
@@ -919,7 +919,7 @@ Example receipts record command, working directory, exit status, bounded output 
 - Automated suite: `npm test`.
 - Result: **70 tests passed; 0 failed.**
 
-The release target is Node.js 22 or later. Node.js 22 and 26 were not available for this qualification run. OMP 19.2.1 was observed, but live plugin qualification was not run. Bun was unavailable. The historical v1 result below is retained as baseline evidence, not current v2 proof.
+The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. OMP 19.2.1 read/write tool qualification is partial. Bun is unavailable. The historical v1 result below is retained as baseline evidence, not current v2 proof.
 
 ## What the automated tests establish
 

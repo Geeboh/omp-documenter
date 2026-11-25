@@ -9,7 +9,7 @@
 - Automated suite: `npm test`.
 - Result: **70 tests passed; 0 failed.**
 
-The release target is Node.js 22 or later. Node.js 22 and 26 were not available for this qualification run. OMP 19.2.1 was observed, but live plugin qualification was not run. Bun was unavailable. The historical v1 result below is retained as baseline evidence, not current v2 proof.
+The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. OMP 19.2.1 read/write tool qualification is partial. Bun is unavailable. The historical v1 result below is retained as baseline evidence, not current v2 proof.
 
 ## What the automated tests establish
 

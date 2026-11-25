@@ -55,12 +55,12 @@ These commands establish only the checks that actually ran. A pack verifier esta
 
 The declared product runtime is Node.js 22 or later. The release matrix requires exact patch versions for Node.js 22, 24, and 26. Record `passed`, `failed`, `not_run`, or `unsupported` for each row. Never convert an unavailable row into a pass.
 
-| Row | Required checks | Default skeleton state |
+| Row | Required checks | Observed state |
 | --- | --- | --- |
-| Node.js 22 | Product suite and affected integration checks | `not_run` |
-| Node.js 24 | Product suite and affected integration checks | `not_run` |
-| Node.js 26 | Product suite and affected integration checks | `not_run` |
-| Real OMP host | Load, skill discovery, tool schema, idle and busy scheduling, approval classification, read-only behavior, and sequential or parallel fallback | `not_run` |
+| Node.js 22.23.5 | Product suite and affected integration checks | `passed` |
+| Node.js 24.22.3 | Product suite, syntax, and benchmark checks | `passed` |
+| Node.js 26.13.1 | Product suite and affected integration checks | `passed` |
+| Real OMP host | Load, skill discovery, tool schema, read/write approval classification, and status/scan invocation | `partial` |
 
 A live host run must name the OMP version and source revision. Record adapter versions only when observed. The v2 pack source reference `bf4a54ec5e1ae9ad6eb7a46c52a3ea059e24e329` is not proof that the installed host matches it.
 
