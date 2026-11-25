@@ -158,3 +158,16 @@ test('inventory cancellation stops at a safe traversal boundary', t => {
   const controller = new AbortController();
   assert.throws(() => runOperation('status', { root, signal: controller.signal, onUpdate: () => controller.abort() }), /cancelled/i);
 });
+
+test('broken-link diagnostics are item-bounded and retrievable by cursor', t => {
+  const root = fixture(t);
+  const links = Array.from({ length: 1000 }, (_, index) => `[Missing ${index}](missing-${index}.md)`).join('\\n');
+  put(root, 'docs/documenter/links.md', `# Links\\n\\n${links}\\n`);
+  const result = runOperation('check', { root });
+  assert.equal(result.links.totalFailures, 1000);
+  assert.equal(result.links.failures.length, 100);
+  assert.ok(result.links.detailResultId);
+  const details = runOperation('details', { root, input: { resultId: result.links.detailResultId, offset: 10, limit: 5 } });
+  assert.equal(details.total, 1000);
+  assert.equal(details.items.length, 5);
+});
