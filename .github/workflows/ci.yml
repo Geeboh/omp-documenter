@@ -1,0 +1,30 @@
+name: Documenter checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  node:
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24, 26]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+      - run: npm run check
+      - run: node scripts/generate-guide.mjs --root . --output "$RUNNER_TEMP/DOCUMENTATION-GUIDE.md"
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 .overhaul/documenter-v2/scripts/verify-pack.py
+      - run: python3 -m unittest discover -s .overhaul/documenter-v2/tests -p 'test_*.py'
