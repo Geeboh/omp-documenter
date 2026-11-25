@@ -7,7 +7,7 @@
 - Runtime: Node.js v24.22.3 on Linux x64.
 - Runtime dependencies: Node built-ins; Git for Git-repository fixtures.
 - Automated suite: `npm test`.
-- Result: **65 tests passed; 0 failed.**
+- Result: **66 tests passed; 0 failed.**
 
 The release target is Node.js 22 or later. Node.js 22 and 26 were not available for this qualification run. OMP 19.2.1 was observed, but live plugin qualification was not run. Bun was unavailable. The historical v1 result below is retained as baseline evidence, not current v2 proof.
 
