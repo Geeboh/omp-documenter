@@ -68,11 +68,15 @@ Parallel component reviews default to **automatic, with up to three workers plus
 - [Roadmap](docs/ROADMAP.md): useful next improvements, in priority order.
 - [Agent skill](skills/omp-documenter/SKILL.md): the instructions OMP follows.
 
-## Compatibility
+## Compatibility and v2 lifecycle
 
-The OMP adapter follows upstream interfaces checked on **16 November 2026**. It uses `registerCommand`, `registerTool`, `pi.zod`, `sendUserMessage` and the `omp.extensions` package manifest. The standalone engine requires **Node.js 20 or later** and has no third-party runtime dependencies. Git is used when available; a filesystem inventory supports non-Git folders.
+Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 24.22.3 and passed 52 tests. Node.js 22, Node.js 26, and live OMP workflow qualification remain unrun.
 
-OMP host integration must be verified against the installed OMP version. Tests with a mock host establish adapter behavior, not real OMP loading or provider compatibility. See [validation](docs/VALIDATION.md) for the precise evidence.
+The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, and `details` actions. Use the repository-relative lifecycle documented in [the user guide](docs/USER-GUIDE.md) and [the documentation-set reference](docs/DOCUMENTATION-SET.md).
+
+External output, semantic search, automatic section merging, proprietary style formats, and Bun execution are unsupported or unqualified core capabilities. Explicit missing style sources fail visibly.
+
+OMP host integration remains a separate qualification result. Mock-host tests and installed skill discovery do not establish a live workflow run.
 
 ## What a passing check means
 

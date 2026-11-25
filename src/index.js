@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { runOperation } from "../lib/engine.mjs";
 
 const skillPath = fileURLToPath(new URL("../skills/omp-documenter/SKILL.md", import.meta.url));
-const actions = ["scan", "status", "record", "publish", "check"];
+const actions = ["scan", "status", "record", "publish", "check", "preview", "plan", "initial", "maintain", "overhaul", "archive", "stage", "validate", "promote", "resume", "archives", "restore", "page", "style", "doctor", "details", "scan-v2"];
 
 export function resolveRoot(cwd, requested = ".") {
   const base = realpathSync(cwd);
@@ -22,42 +22,29 @@ export function workflowPrompt(mode, cwd) {
   return [
     `Run OMP Documenter in ${mode} mode for repository ${JSON.stringify(realpathSync(cwd))}.`,
     `The bundled skill is ${JSON.stringify(skillPath)}. Resolve its reference links relative to that file.`,
-    "Use documenter_state for inventory, evidence, coverage and safe publication. Continue all authorized documentation work to completion; record unresolved facts and continue independent work.",
-    "Produce clear, consistent, user-friendly documentation grounded in source evidence. The following is the requested skill workflow:",
+    "Use documenter_state for inventory, evidence, coverage and safe publication. Continue authorized documentation work and record unresolved facts.",
+    "Produce clear documentation grounded in source evidence. The bundled skill workflow follows:",
     skill
   ].join("\n\n");
 }
 
-function rendered(result) {
-  return JSON.stringify(result, null, 2);
-}
+function rendered(result) { return JSON.stringify(result, null, 2); }
 
-/** Human-readable command output; the agent tool and CLI retain structured JSON. */
 export function formatReport(result) {
   const coverage = result.coverage ?? {};
   const count = item => item ? `${item.count ?? item.reviewed ?? 0} / ${item.denominator ?? item.total ?? 0}` : "Not recorded";
   const lines = [
-    "## Documentation status",
-    "",
-    "| Measure | Current count |",
-    "| --- | --- |",
+    "## Documentation status", "",
+    "| Measure | Current count |", "| --- | --- |",
     `| Source files reviewed | ${count(coverage.reviewed)} |`,
     `| Source files documented | ${count(coverage.documented)} |`,
     `| Documentation pages reviewed | ${count(coverage.documentationPages)} |`,
     `| Current supported claims | ${coverage.claims?.supported ?? 0} |`,
     `| Stale claims | ${coverage.claims?.stale ?? 0} |`,
-    `| Declared symbols (not an exhaustive total) | ${coverage.symbols?.declared ?? 0} |`,
-    ""
+    `| Declared symbols (not an exhaustive total) | ${coverage.symbols?.declared ?? 0} |`, ""
   ];
-  if (typeof result.integrity === "boolean") {
-    lines.push(`**Mechanical integrity: ${result.integrity ? "PASS" : "needs attention"}. Defined scope complete: ${result.complete ? "yes" : "no"}.**`, "");
-  }
-  const labels = {
-    unreviewed: "Source files awaiting review", undocumented: "Source files awaiting documentation",
-    unreviewedDocumentation: "Documentation pages awaiting review", documentationGaps: "Documentation inspection gaps",
-    staleReviews: "Stale reviews", staleClaims: "Stale claims", stalePages: "Changed or missing generated pages",
-    gaps: "Source inspection gaps", openUnknowns: "Open questions", unsettledClaims: "Unknown or conflicting claims"
-  };
+  if (typeof result.integrity === "boolean") lines.push(`**Mechanical integrity: ${result.integrity ? "PASS" : "needs attention"}. Defined scope complete: ${result.complete ? "yes" : "no"}.**`, "");
+  const labels = { unreviewed: "Source files awaiting review", undocumented: "Source files awaiting documentation", unreviewedDocumentation: "Documentation pages awaiting review", documentationGaps: "Documentation inspection gaps", staleReviews: "Stale reviews", staleClaims: "Stale claims", stalePages: "Changed or missing generated pages", gaps: "Source inspection gaps", openUnknowns: "Open questions", unsettledClaims: "Unknown or conflicting claims" };
   const attention = Object.entries(result.attention ?? {}).filter(([, items]) => Array.isArray(items) && items.length);
   if (attention.length) {
     lines.push("### Needs attention", "");
@@ -68,30 +55,58 @@ export function formatReport(result) {
     }
     lines.push("");
   } else lines.push("No outstanding attention items were reported by this operation.", "");
-  if (result.links?.failures?.length) lines.push(`Local link failures: **${result.links.failures.length}**. Inspect the CLI check output for individual targets.`, "");
+  if (result.links?.failures?.length) lines.push(`Local link failures: **${result.links.failures.length}**. Inspect CLI check output for individual targets.`, "");
   lines.push(`Explicit exclusions: ${result.scope?.exclusions ?? 0}. Repository boundaries: ${result.scope?.repositoryBoundaries ?? 0}.`, "");
   if (result.snapshot) lines.push(`Source snapshot: \`${result.snapshot}\`.`, "");
-  lines.push("Counts and hashes track recorded work; they do not prove semantic correctness or that examples were executed. Read `.documenter/inventory.json` and `.documenter/ledger.json` for persisted details, or use the standalone CLI for a full live report.");
+  lines.push("Counts and hashes track recorded work. They do not prove semantic correctness or executed examples.");
   return lines.join("\n");
 }
 
-/** OMP extension factory. Register capabilities only; importing does not scan or write a repository. */
-export default function documenter(pi) {
-  if (!pi.zod || typeof pi.registerTool !== "function" || typeof pi.registerCommand !== "function") {
-    throw new Error("OMP Documenter requires the OMP extension API with pi.zod, registerTool and registerCommand. Use a compatible OMP release or the standalone Node CLI.");
+function commandWords(value) {
+  const words = []; let current = ""; let quote = null; let escaped = false;
+  for (const char of value) {
+    if (escaped) { current += char; escaped = false; continue; }
+    if (char === "\\" && quote !== "'") { escaped = true; continue; }
+    if (quote) { if (char === quote) quote = null; else current += char; continue; }
+    if (char === "'" || char === '"') { quote = char; continue; }
+    if (/\s/.test(char)) { if (current) { words.push(current); current = ""; } continue; }
+    current += char;
   }
+  if (escaped || quote) throw new Error("Unmatched quote or escape in command.");
+  if (current) words.push(current);
+  return words;
+}
+
+function parseCommandOptions(words, mode) {
+  const input = {}; let strict = false; const singleton = new Set();
+  const fields = { "--set": "setId", "--dest": "dest", "--frontpage": "frontpage", "--style": "style", "--style-from": "styleFrom", "--run-id": "runId", "--archive-id": "archiveId", "--path": "path", "--new-path": "newPath", "--expected-sha256": "expectedSha256", "--source": "source", "--mode": "mode", "--result-id": "resultId", "--operation": "operation" };
+  while (words.length) {
+    const option = words.shift();
+    if (singleton.has(option)) throw new Error(`Duplicate option: ${option}`);
+    singleton.add(option);
+    if (option === "--strict") {
+      if (mode !== "check") throw new Error("--strict is supported only by check.");
+      strict = true;
+      continue;
+    }
+    if (option === "--dry-run") { input.dryRun = true; continue; }
+    const field = fields[option];
+    if (!field) throw new Error(`Unknown option ${option}.`);
+    const value = words.shift();
+    if (!value || value.startsWith("--")) throw new Error(`${option} requires a value.`);
+    input[field] = value;
+  }
+  if (mode === "check" && Object.keys(input).some(key => key !== "dryRun")) throw new Error("check accepts only --strict.");
+  if (input.style && input.styleFrom) throw new Error("--style and --style-from are mutually exclusive.");
+  return { input, strict };
+}
+
+export default function documenter(pi) {
+  if (!pi.zod || typeof pi.registerTool !== "function" || typeof pi.registerCommand !== "function") throw new Error("OMP Documenter requires the OMP extension API with pi.zod, registerTool and registerCommand. Use a compatible OMP release or the standalone Node CLI.");
   const z = pi.zod;
   pi.registerTool({
-    name: "documenter_state",
-    label: "Documenter",
-    description: "Inventory a repository, report documentation coverage, record evidence, or safely publish Markdown. Scan/record/publish write .documenter state; status/check inspect live source. Hash freshness is not proof of semantic correctness. Read the bundled omp-documenter skill before generating documentation.",
-    approval: "write",
-    parameters: z.object({
-      action: z.enum(actions),
-      root: z.string().optional().describe("Repository root, restricted to the session directory or one of its descendants. Defaults to the session directory."),
-      inputJson: z.string().optional().describe("JSON-encoded record or publish payload as defined by the skill references; omit for scan/status/check."),
-      strict: z.boolean().optional().describe("For check: also fail for incomplete coverage and unresolved gaps.")
-    }),
+    name: "documenter_state", label: "Documenter", description: "Run deterministic Documenter state operations. Mutating actions write guarded repository state; read-only actions inspect it.", approval: "write",
+    parameters: z.object({ action: z.enum(actions), root: z.string().optional(), inputJson: z.string().optional(), strict: z.boolean().optional() }),
     async execute(_id, params, signal, _onUpdate, ctx) {
       try {
         if (signal?.aborted) throw new Error("Documentation operation cancelled before execution.");
@@ -107,28 +122,23 @@ export default function documenter(pi) {
     }
   });
   pi.registerCommand("documenter", {
-    description: "Create or maintain documentation: initial | maintain | status | check [--strict]",
+    description: "Create, maintain, inspect or overhaul documentation. Supports quoted paths and guarded lifecycle actions.",
     handler: async (args, ctx) => {
-      const words = args.trim().split(/\s+/).filter(Boolean);
+      let words;
+      try { words = commandWords(args.trim()); } catch (error) { ctx.ui.notify(`Documenter: ${error.message}`, "error"); return; }
       const mode = words.shift() || "help";
-      const valid = ["initial", "maintain", "status", "check"];
-      if (!valid.includes(mode) || (words.length && !(mode === "check" && words.length === 1 && words[0] === "--strict"))) {
-        ctx.ui.notify("Usage: /documenter initial | maintain | status | check [--strict]", "info");
-        return;
-      }
+      const valid = new Set(["initial", "maintain", "status", "check", "preview", "plan", "overhaul", "archive", "stage", "validate", "promote", "resume", "archives", "restore", "page", "style", "doctor", "details"]);
+      if (!valid.has(mode)) { ctx.ui.notify("Usage: /documenter initial | maintain | status | check [--strict] | overhaul [options]", "info"); return; }
       try {
         if (mode === "initial" || mode === "maintain") {
-          pi.sendUserMessage(workflowPrompt(mode, ctx.cwd), {
-            attribution: "agent",
-            ...(ctx.isIdle() ? {} : { deliverAs: "followUp" })
-          });
+          if (words.length) throw new Error(`Usage: /documenter ${mode} does not accept command options; use overhaul for an explicit plan.`);
+          pi.sendUserMessage(workflowPrompt(mode, ctx.cwd), { attribution: "agent", ...(ctx.isIdle() ? {} : { deliverAs: "followUp" }) });
           return;
         }
-        const result = await runOperation(mode, { root: resolveRoot(ctx.cwd), strict: words.includes("--strict") });
+        const { input, strict } = parseCommandOptions(words, mode);
+        const result = await runOperation(mode, { root: resolveRoot(ctx.cwd), input, strict });
         pi.sendMessage({ customType: "documenter-report", content: formatReport(result), display: true }, { triggerTurn: false });
-      } catch (error) {
-        ctx.ui.notify(`Documenter: ${error instanceof Error ? error.message : String(error)}`, "error");
-      }
+      } catch (error) { ctx.ui.notify(`Documenter: ${error instanceof Error ? error.message : String(error)}`, "error"); }
     }
   });
 }

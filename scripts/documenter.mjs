@@ -1,21 +1,44 @@
 #!/usr/bin/env node
+
 import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { runOperation } from "../lib/engine.mjs";
 
-const help = `OMP Documenter 1.0.0
+const actions = new Set([
+  "scan", "status", "record", "publish", "check",
+  "preview", "plan", "initial", "maintain", "overhaul",
+  "archive", "stage", "validate", "promote", "resume",
+  "archives", "restore", "page", "style", "doctor", "details", "scan-v2"
+]);
+
+const valueFields = {
+  "--root": "root", "--input": "inputPath", "--set": "setId", "--dest": "dest",
+  "--frontpage": "frontpage", "--style": "style", "--style-from": "styleFrom",
+  "--run-id": "runId", "--archive-id": "archiveId", "--operation": "operation",
+  "--path": "path", "--new-path": "newPath", "--expected-sha256": "expectedSha256",
+  "--source": "source", "--mode": "mode", "--result-id": "resultId",
+  "--offset": "offset", "--limit": "limit", "--reason": "reason"
+};
+
+const help = `OMP Documenter 2.0.0
 
 Usage:
-  node scripts/documenter.mjs scan   --root /path/to/repository
-  node scripts/documenter.mjs status --root /path/to/repository
-  node scripts/documenter.mjs record --root /path/to/repository --input /path/to/records.json
-  node scripts/documenter.mjs publish --root /path/to/repository --input /path/to/page.json
-  node scripts/documenter.mjs check --root /path/to/repository [--strict]
+  node scripts/documenter.mjs scan|status|check --root PATH [--strict]
+  node scripts/documenter.mjs record|publish --root PATH --input FILE
+  node scripts/documenter.mjs initial|maintain|overhaul --root PATH [options]
+  node scripts/documenter.mjs preview|plan|archive|stage|validate|promote|resume --root PATH [options]
+  node scripts/documenter.mjs archives|doctor|details --root PATH [options]
+  node scripts/documenter.mjs page|style --root PATH --operation OP [options]
 
-The CLI tracks evidence and safely publishes agent-written pages. It does not
-generate prose or independently prove what source code means.
-Exit: 0 = operation succeeded; 2 = check/conflict not satisfied; 1 = invalid input/error.
-See docs/ENGINE.md for exact payloads and coverage definitions.
+Options:
+  --set ID, --dest PATH, --frontpage none|root|all
+  --style existing|fresh, --style-from PATH, --dry-run, --strict
+  --input FILE, --run-id ID, --archive-id ID, --path PATH, --new-path PATH
+  --expected-sha256 HASH, --source PATH, --mode MODE, --result-id ID
+
+The deterministic engine does not generate prose. External output, semantic search
+and automatic section merging remain unsupported core capabilities.
+Exit 0 means success, 2 means conflict or unsatisfied check, and 1 means invalid input or execution error.
 `;
 
 async function main() {
@@ -25,33 +48,44 @@ async function main() {
     return;
   }
   const action = args.shift();
-  if (!["scan", "status", "record", "publish", "check"].includes(action)) throw new Error(`Unknown action: ${action}. Use --help.`);
-  const options = { root: process.cwd(), strict: false };
+  if (!actions.has(action)) throw new Error(`Unknown action: ${action}. Use --help.`);
+  const input = {};
+  let root = process.cwd();
   let inputPath;
+  let strict = false;
   const seen = new Set();
   while (args.length) {
     const option = args.shift();
+    if (option === "--dry-run") {
+      if (seen.has(option)) throw new Error(`Duplicate option: ${option}`);
+      seen.add(option);
+      input.dryRun = true;
+      continue;
+    }
+    if (option === "--strict") {
+      if (action !== "check") throw new Error("--strict supported only by check.");
+      strict = true;
+      continue;
+    }
+    const field = valueFields[option];
+    if (!field) throw new Error(`Unknown option: ${option}. Use --help.`);
     if (seen.has(option)) throw new Error(`Duplicate option: ${option}`);
     seen.add(option);
-    if (option === "--strict") {
-      if (action !== "check") throw new Error("--strict is supported only by check.");
-      options.strict = true;
-    } else if (["--root", "--input"].includes(option)) {
-      const value = args.shift();
-      if (!value || value.startsWith("--")) throw new Error(`${option} requires a value.`);
-      if (option === "--root") options.root = resolve(value);
-      else inputPath = resolve(value);
-    } else throw new Error(`Unknown option: ${option}. Use --help.`);
-  }
-  if (["record", "publish"].includes(action) !== Boolean(inputPath)) {
-    throw new Error("record and publish require --input; scan/status/check do not accept it.");
+    const value = args.shift();
+    if (value === undefined || value.startsWith("--")) throw new Error(`${option} requires a value.`);
+    if (field === "root") root = resolve(value);
+    else if (field === "inputPath") inputPath = resolve(value);
+    else input[field] = value;
   }
   if (inputPath) {
     const stat = statSync(inputPath);
-    if (!stat.isFile() || stat.size > 4 * 1024 * 1024) throw new Error("Input must be a regular JSON file no larger than 4 MiB.");
-    options.input = JSON.parse(readFileSync(inputPath, "utf8"));
+    if (!stat.isFile() || stat.size > 16 * 1024 * 1024) throw new Error("Input must be a regular JSON file no larger than 16 MiB.");
+    const parsed = JSON.parse(readFileSync(inputPath, "utf8"));
+    Object.assign(input, parsed);
   }
-  const result = await runOperation(action, options);
+  if (["record", "publish"].includes(action) && !inputPath) throw new Error(`${action} requires --input.`);
+  if (!["record", "publish"].includes(action) && inputPath && ["scan", "status", "check"].includes(action)) throw new Error(`${action} does not accept --input.`);
+  const result = await runOperation(action, { root, input, strict });
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   if (result.ok === false) process.exitCode = 2;
 }

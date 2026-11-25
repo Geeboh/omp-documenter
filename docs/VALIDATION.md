@@ -1,15 +1,15 @@
 # Validation and limits
 
-## Validation environment
+## Current v2 candidate
 
-- Package version: 1.0.0.
-- Validation date: 16 November 2026.
-- Runtime: Node.js v24.22.1 on Linux.
+- Package version: 2.0.0.
+- Candidate working revision: see `.overhaul/documenter-v2/work/RELEASE-EVIDENCE.md`.
+- Runtime: Node.js v24.22.3 on Linux x64.
 - Runtime dependencies: Node built-ins; Git for Git-repository fixtures.
-- Automated suite: `node --test tests/*.test.mjs`.
-- Result: **39 tests passed; 0 failed.**
+- Automated suite: `npm test`.
+- Result: **52 tests passed; 0 failed.**
 
-The engine targets Node.js 20 or later, but this session's execution evidence is for Node 24.22.1. A Node 20 compatibility run and a live OMP/Bun integration run were not available in this workspace.
+The release target is Node.js 22 or later. Node.js 22 and 26 were not available for this qualification run. OMP 19.2.1 was observed, but live plugin qualification was not run. Bun was unavailable. The historical v1 result below is retained as baseline evidence, not current v2 proof.
 
 ## What the automated tests establish
 

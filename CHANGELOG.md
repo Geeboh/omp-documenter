@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.0 — 26 November 2026
+
+- Added repository-relative documentation sets, remembered destinations, exact front-page policies, and guarded overhaul lifecycle actions.
+- Added verified archives, staging, validation, journaled promotion, resume, restore, and explicit page ownership transitions.
+- Added versioned Existing/Fresh/style-source profiles with bounded Markdown, text, and HTML extraction.
+- Added combined-guide and release-evidence generators.
+- Raised the runtime minimum from Node.js 20 to Node.js 22.
+
+Local implementation qualification passed on Node.js 24.22.3. Node.js 22, Node.js 26, and live OMP qualification remain unrun.
+
 ## 1.0.0 — 16 November 2026
 
 - Added an OMP extension package with initial, maintenance, status and check commands.

@@ -1,6 +1,6 @@
 # OMP Documenter user guide
 
-Version 1.0.0 · 16 November 2026
+Version 2.0.0 · 26 November 2026
 
 ## Contents
 
@@ -335,3 +335,42 @@ A run is useful when it produces navigable documentation, identifies what it has
 A fully verified scope requires current evidence, reviewed documentation pages, covered components and symbol checklists, coherent architecture and workflows, appropriate examples, valid navigation and no undisclosed gaps. When evidence is unavailable, finish the run as **complete with gaps**, list the questions and next steps, and avoid claiming complete verification.
 
 Manual user testing is not a prerequisite for finishing the documentation run. If a behavior cannot be executed in the available environment, describe the static evidence and mark the runtime result unverified. Do not describe an unexecuted command as tested.
+
+## 13. Rebuild a documentation set
+
+Documenter 2 records a stable documentation-set identity. The destination and front-page policy are repository-relative and persist in `.documenter/sets/`.
+
+Preview before writing:
+
+```bash
+node scripts/documenter.mjs preview --root "$PWD" --dest "Project Documentation" --frontpage all
+```
+
+Use `overhaul` for a complete guarded run. The deterministic engine archives selected originals, but the coordinating OMP workflow supplies reviewed staged prose.
+
+```bash
+node scripts/documenter.mjs plan --root "$PWD" --dest docs --frontpage all --style existing
+node scripts/documenter.mjs archive --root "$PWD" --run-id RUN_ID
+node scripts/documenter.mjs stage --root "$PWD" --run-id RUN_ID --input staged.json
+node scripts/documenter.mjs validate --root "$PWD" --run-id RUN_ID
+node scripts/documenter.mjs promote --root "$PWD" --run-id RUN_ID
+```
+
+`--frontpage` accepts `none`, `root`, or `all`. `--style existing` reuses an adopted profile or usable project documentation. `--style fresh` selects the versioned built-in profile. `--style-from` requires an accessible local text, Markdown, or HTML source and fails visibly when extraction is unavailable.
+
+External output, semantic search, proprietary reference adapters, and automatic section merging are not core capabilities. The engine preserves non-Markdown assets and reports unsupported formats.
+
+## 14. Manage pages and recover
+
+Accept a reviewed manual correction, release a page to human management, rename it with history, or retire it without erasing the page bytes:
+
+```bash
+node scripts/documenter.mjs page --root "$PWD" --operation accept --path docs/guide.md --expected-sha256 HASH
+node scripts/documenter.mjs page --root "$PWD" --operation release --path docs/guide.md --expected-sha256 HASH
+node scripts/documenter.mjs archives --root "$PWD"
+node scripts/documenter.mjs doctor --root "$PWD"
+node scripts/documenter.mjs resume --root "$PWD" --run-id RUN_ID
+node scripts/documenter.mjs restore --root "$PWD" --archive-id ARCHIVE_ID --dry-run
+```
+
+Promotion uses per-file guards and a journal. A changed page creates a conflict. Preserve the newer edit and resolve it through the page lifecycle. Do not use `git reset --hard`, `git clean -fd`, or `rm -rf .documenter` for recovery.
