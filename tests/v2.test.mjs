@@ -151,3 +151,10 @@ test('claim dependencies invalidate affected claims without changing unrelated e
   const status = runOperation('status', { root });
   assert.equal(status.coverage.claims.stale, 1);
 });
+
+test('inventory cancellation stops at a safe traversal boundary', t => {
+  const root = fixture(t);
+  for (let index = 0; index < 100; index++) put(root, `src/generated-${index}.js`, 'export const n = 1;');
+  const controller = new AbortController();
+  assert.throws(() => runOperation('status', { root, signal: controller.signal, onUpdate: () => controller.abort() }), /cancelled/i);
+});

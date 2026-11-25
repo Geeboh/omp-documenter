@@ -113,7 +113,7 @@ export default function documenter(pi) {
         const root = resolveRoot(ctx.cwd, params.root);
         if (params.inputJson && Buffer.byteLength(params.inputJson, "utf8") > 4 * 1024 * 1024) throw new Error("Input JSON exceeds the 4 MiB limit.");
         const input = params.inputJson === undefined ? undefined : JSON.parse(params.inputJson);
-        const result = await runOperation(params.action, { root, input, strict: params.strict ?? false });
+        const result = await runOperation(params.action, { root, input, strict: params.strict ?? false, signal, onUpdate: _onUpdate });
         return { content: [{ type: "text", text: rendered(result) }], details: result, ...(result.ok === false ? { isError: true } : {}) };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
