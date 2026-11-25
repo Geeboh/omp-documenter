@@ -20,10 +20,14 @@ export function benchmark({ files = 50, pageLinks = 100 } = {}) {
     const runs = [];
     for (const operation of ['status', 'check']) {
       const started = performance.now();
+      const cpuBefore = process.resourceUsage();
+      const rssBefore = process.memoryUsage().rss;
       const result = runOperation(operation, { root });
-      runs.push({ operation, elapsedMs: Math.round((performance.now() - started) * 1000) / 1000, eligibleFiles: result.scope?.eligibleFiles ?? result.inventory?.eligible, linkFailures: result.links?.totalFailures ?? 0, resultBytes: Buffer.byteLength(JSON.stringify(result)) });
+      const cpuAfter = process.resourceUsage();
+      const rssAfter = process.memoryUsage().rss;
+      runs.push({ operation, elapsedMs: Math.round((performance.now() - started) * 1000) / 1000, userCpuMicros: cpuAfter.userCPUTime - cpuBefore.userCPUTime, systemCpuMicros: cpuAfter.systemCPUTime - cpuBefore.systemCPUTime, rssDeltaBytes: rssAfter - rssBefore, eligibleFiles: result.scope?.eligibleFiles ?? result.inventory?.eligible, linkFailures: result.links?.totalFailures ?? 0, resultBytes: Buffer.byteLength(JSON.stringify(result)) });
     }
-    return { schemaVersion: 2, runtime: process.version, platform: `${process.platform}/${process.arch}`, fixture: { files, pageLinks }, runs, note: 'Controlled local wall-time observation. It is not a universal speedup, token, CPU, or memory claim.' };
+    return { schemaVersion: 2, runtime: process.version, platform: `${process.platform}/${process.arch}`, fixture: { files, pageLinks }, runs, tokenMeasurement: 'unavailable', note: 'Controlled local wall-time, CPU-time, and RSS observation. It is not a universal speedup or capacity claim.' };
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 }
 
