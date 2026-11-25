@@ -6,7 +6,7 @@ import path from 'node:path';
 import { detectRenderer, verifyExamples } from '../lib/verification.mjs';
 
 test('example harness executes explicit argv without shell interpretation', () => {
-  const result = verifyExamples({ examples: [{ id: 'node-version', argv: [process.execPath, '--version'], expectedExit: 0, stdoutIncludes: 'v' }] });
+  const result = verifyExamples({ examples: [{ id: 'node-version', argv: [process.execPath, '--version'], expectedExit: 0, stdoutIncludes: process.versions.bun ? '.' : 'v' }] });
   assert.equal(result.passed, true);
   assert.equal(result.results[0].argv[0], process.execPath);
   assert.equal(result.scope.includes('No shell interpretation'), true);
