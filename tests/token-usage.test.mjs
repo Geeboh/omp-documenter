@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { normalizeUsageRecord, readUsageStats, syncUsage } from '../lib/token-usage.mjs';
+import { discoverOmpUsageFiles, normalizeUsageRecord, readUsageStats, syncUsage } from '../lib/token-usage.mjs';
 
 test('normalizes provider usage into independent token buckets', () => {
   const record = normalizeUsageRecord({ id: 'a', model: 'claude', usage: { input_tokens: 100, output_tokens: 20, cache_read_input_tokens: 30, cache_creation_input_tokens: 5 } });
@@ -21,4 +21,19 @@ test('syncs JSONL incrementally and aggregates model, provider, day, and cache r
   assert.equal(stats.cacheRate, 30 / 130);
   assert.equal(stats.byModel.gpt.messages, 1);
   assert.equal(stats.tokenMeasurement, 'reported-host-usage');
+});
+
+test('discovers OMP session JSONL without Tersio', t => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'documenter-omp-home-'));
+  const sessionDir = path.join(home, '.omp', 'agent', 'sessions', 'project');
+  fs.mkdirSync(sessionDir, { recursive: true });
+  fs.writeFileSync(path.join(sessionDir, 'session.jsonl'), `${JSON.stringify({ type: 'model_usage', id: 'omp-1', model: 'gpt-local', usage: { input: 10, output: 3, cacheRead: 2, cacheWrite: 0 } })}\n`);
+  t.after(() => fs.rmSync(home, { recursive: true, force: true }));
+  const files = discoverOmpUsageFiles({ home });
+  assert.equal(files.length, 1);
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'documenter-omp-repo-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const result = syncUsage({ root, discoverOmp: true, home });
+  assert.equal(result.records, 1);
+  assert.equal(readUsageStats({ root }).totals.total, 15);
 });
