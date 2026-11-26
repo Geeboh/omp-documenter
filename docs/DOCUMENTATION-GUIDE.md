@@ -85,7 +85,7 @@ Parallel component reviews default to **automatic, with up to three workers plus
 
 ## Compatibility and v2 lifecycle
 
-Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 22.23.5, 24.22.3, and 26.13.1, plus Bun 1.4.5. The focused current run passes 81 tests on Node.js 24.22.3, including real Xberg PDF/DOCX extraction and generic authenticated acquisition.
+Documenter 2.0.0 requires Node.js 22 or later. The current qualification run passes 88 tests on Node.js 24.22.3 and Bun 1.4.5, including real Xberg PDF/DOCX extraction, authenticated acquisition and local Tesseract OCR.
 
 The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, `details`, and `ocr` actions. Use the repository-relative lifecycle documented in [the user guide](USER-GUIDE.md) and [the documentation-set reference](DOCUMENTATION-SET.md).
 
@@ -973,9 +973,9 @@ The sync accepts explicit JSONL usage records, normalizes provider fields into i
 - Runtime: Node.js v24.22.3 on Linux x64.
 - Runtime dependencies: Node built-ins; Git for Git-repository fixtures.
 - Automated suite: `npm test`.
-- Result: **70 tests passed; 0 failed.**
+- Result: **88 tests passed; 0 failed.**
 
-The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the full suite. OMP 19.2.1 read/write tool qualification is partial. The historical v1 result below is retained as baseline evidence, not current v2 proof.
+The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the full suite. Local Tesseract OCR passed real raster and image-only PDF qualification. OMP 19.2.1 read/write tool qualification is partial.
 
 ## What the automated tests establish
 
