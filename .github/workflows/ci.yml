@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+      - run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd poppler-utils
+      - run: npm ci
       - run: npm test
       - run: npm run check
       - run: node scripts/generate-guide.mjs --root . --output "$RUNNER_TEMP/DOCUMENTATION-GUIDE.md"
