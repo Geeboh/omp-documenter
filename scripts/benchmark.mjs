@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { readUsageStats } from '../lib/token-usage.mjs';
 import { performance } from 'node:perf_hooks';
 import { runOperation } from '../lib/engine.mjs';
 
@@ -27,7 +28,8 @@ export function benchmark({ files = 50, pageLinks = 100 } = {}) {
       const rssAfter = process.memoryUsage().rss;
       runs.push({ operation, elapsedMs: Math.round((performance.now() - started) * 1000) / 1000, userCpuMicros: cpuAfter.userCPUTime - cpuBefore.userCPUTime, systemCpuMicros: cpuAfter.systemCPUTime - cpuBefore.systemCPUTime, rssDeltaBytes: rssAfter - rssBefore, eligibleFiles: result.scope?.eligibleFiles ?? result.inventory?.eligible, linkFailures: result.links?.totalFailures ?? 0, resultBytes: Buffer.byteLength(JSON.stringify(result)) });
     }
-    return { schemaVersion: 2, runtime: process.version, platform: `${process.platform}/${process.arch}`, fixture: { files, pageLinks }, runs, tokenMeasurement: 'unavailable', note: 'Controlled local wall-time, CPU-time, and RSS observation. It is not a universal speedup or capacity claim.' };
+    const tokenUsage = readUsageStats({ root: process.cwd() });
+    return { schemaVersion: 2, runtime: process.version, platform: `${process.platform}/${process.arch}`, fixture: { files, pageLinks }, runs, tokenUsage, tokenMeasurement: tokenUsage.tokenMeasurement, note: 'Controlled local wall-time, CPU-time, RSS, and native usage-ledger observation. It is not a universal speedup or capacity claim.' };
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 }
 
