@@ -23,7 +23,7 @@ Documentation must be clear, consistent and user friendly. Every factual explana
 
 ## Start here
 
-1. Install or unpack this package into a permanent directory outside the repository you want to document.
+1. Install or unpack this package into a permanent directory outside the repository you want to document. Run `npm install --omit=dev` in that directory to install the pinned native Xberg backend. If the backend is unavailable, Markdown and plain-text workflows still work.
 2. Link it to OMP:
 
    ```bash
@@ -85,12 +85,11 @@ Parallel component reviews default to **automatic, with up to three workers plus
 
 ## Compatibility and v2 lifecycle
 
-Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 22.23.5, 24.22.3, and 26.13.1, plus Bun 1.4.5. All 70 tests passed. Live OMP workflow qualification remains partial.
+Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 22.23.5, 24.22.3, and 26.13.1, plus Bun 1.4.5. The focused current run passes 81 tests on Node.js 24.22.3, including real Xberg PDF/DOCX extraction and generic authenticated acquisition.
 
 The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, and `details` actions. Use the repository-relative lifecycle documented in [the user guide](USER-GUIDE.md) and [the documentation-set reference](DOCUMENTATION-SET.md).
 
-External output, semantic search, automatic section merging, and proprietary style formats remain unsupported or unqualified core capabilities. Explicit missing style sources fail visibly.
-
+External output, semantic search, automatic section merging and proprietary providers remain unsupported core capabilities. PDF and DOCX style sources are qualified through pinned `@xberg-io/xberg` 1.5.4. Generic authenticated acquisition is origin-scoped and rejects login pages, redirects and rejected credentials. OCR models, visual layout fidelity and named-provider login remain unqualified.
 If another OMP plugin fails during automatic discovery, use `node scripts/omp-documenter-host.mjs` to load Documenter with automatic extensions disabled. This does not uninstall or modify other plugins.
 
 ## What a passing check means
@@ -128,7 +127,7 @@ The plugin has three parts. The **skill** explains how to investigate and write.
 
 Clear writing is a required outcome. Procedures should tell the reader where to run commands, what is needed first, what each action does, what success looks like and how to recover when it fails. An API reference should explain the contract and examples, not merely repeat a function name.
 
-Documenter does not need an external documentation service or database. Its local engine has no third-party runtime dependencies. It does not install project dependencies or start applications on its own.
+Documenter’s core engine has one pinned runtime dependency, `@xberg-io/xberg` 1.5.4, for broad document extraction. Markdown and plain-text workflows remain usable when its native backend is unavailable. Documenter does not install project dependencies or start applications on its own.
 
 ## 2. Install the plugin
 
@@ -157,7 +156,13 @@ Run this from the directory where you downloaded the installer:
 node ./omp-documenter-2.0.0-install.mjs "$HOME/.local/share/omp-documenter-2.0.0"
 ```
 
-The installer refuses an existing destination so it cannot overwrite a previous installation. If the chosen directory already exists, inspect it and choose a new destination. Keep the installed directory outside the repository being documented.
+After installation, install the pinned runtime dependency before linking:
+
+```bash
+cd "$HOME/.local/share/omp-documenter-2.0.0"
+npm install --omit=dev
+```
+
 
 Link the package to OMP:
 
@@ -460,7 +465,7 @@ node scripts/documenter.mjs promote --root "$PWD" --run-id RUN_ID
 ```
 
 `--frontpage` accepts `none`, `root`, or `all`. `--style existing` reuses an adopted profile or usable project documentation. `--style fresh` selects the versioned built-in profile. `--style-from` requires an accessible local text, Markdown, or HTML source and fails visibly when extraction is unavailable.
-Explicit PDF and DOCX style sources use the pinned `@xberg-io/xberg` 1.5.4 backend through the shared engine. `doctor` reports its formats, native extractors, renderers, OCR backends and missing optional models. Generic authenticated acquisition is available to integrations through origin-scoped bearer credentials referenced by environment variable; credentials never enter parser input or receipts. OCR models, visual fidelity and named-provider login remain unavailable unless separately qualified.
+Explicit PDF and DOCX style sources use the pinned `@xberg-io/xberg` 1.5.4 backend through the shared engine. `doctor` reports formats, extractors, renderers, OCR backends and missing models. Generic authenticated acquisition accepts only an origin allow-list and an environment-variable credential reference. Login pages, redirects and rejected credentials remain unresolved sources. Transient HTTP failures use bounded retries; authentication failures do not retry.
 
 External output, semantic search, proprietary reference adapters, and automatic section merging are not core capabilities. The engine preserves non-Markdown assets and reports unsupported formats.
 
