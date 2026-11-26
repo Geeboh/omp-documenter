@@ -87,9 +87,10 @@ Parallel component reviews default to **automatic, with up to three workers plus
 
 Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 22.23.5, 24.22.3, and 26.13.1, plus Bun 1.4.5. The focused current run passes 81 tests on Node.js 24.22.3, including real Xberg PDF/DOCX extraction and generic authenticated acquisition.
 
-The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, and `details` actions. Use the repository-relative lifecycle documented in [the user guide](USER-GUIDE.md) and [the documentation-set reference](DOCUMENTATION-SET.md).
+The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, `details`, and `ocr` actions. Use the repository-relative lifecycle documented in [the user guide](USER-GUIDE.md) and [the documentation-set reference](DOCUMENTATION-SET.md).
 
-External output, semantic search, automatic section merging and proprietary providers remain unsupported core capabilities. PDF and DOCX style sources are qualified through pinned `@xberg-io/xberg` 1.5.4. Generic authenticated acquisition is origin-scoped and rejects login pages, redirects and rejected credentials. OCR models, visual layout fidelity and named-provider login remain unqualified.
+External output, semantic search, automatic section merging and proprietary providers remain unsupported core capabilities. PDF and DOCX style sources are qualified through pinned `@xberg-io/xberg` 1.5.4. Generic authenticated acquisition is origin-scoped and rejects login pages, redirects and rejected credentials. `tessdata_best`, visual layout fidelity and named-provider login remain unqualified.
+Local OCR uses the installed Xberg Tesseract backend. `ocr status`, `ocr doctor`, `ocr models list`, `ocr models verify` and `ocr test` expose readiness and receipts. Model downloads are not automatic.
 If another OMP plugin fails during automatic discovery, use `node scripts/omp-documenter-host.mjs` to load Documenter with automatic extensions disabled. This does not uninstall or modify other plugins.
 
 ## What a passing check means
@@ -117,7 +118,8 @@ Version 2.0.0 · 26 November 2026
 11. [Troubleshoot and recover](#11-troubleshoot-and-recover)
 12. [Definition of a useful completed run](#12-definition-of-a-useful-completed-run)
 13. [Rebuild a documentation set](#13-rebuild-a-documentation-set)
-14. [Manage pages and recover](#14-manage-pages-and-recover)
+14. [Local OCR](#14-local-ocr)
+15. [Manage pages and recover](#15-manage-pages-and-recover)
 
 ## 1. What Documenter does
 
@@ -467,9 +469,23 @@ node scripts/documenter.mjs promote --root "$PWD" --run-id RUN_ID
 `--frontpage` accepts `none`, `root`, or `all`. `--style existing` reuses an adopted profile or usable project documentation. `--style fresh` selects the versioned built-in profile. `--style-from` requires an accessible local text, Markdown, or HTML source and fails visibly when extraction is unavailable.
 Explicit PDF and DOCX style sources use the pinned `@xberg-io/xberg` 1.5.4 backend through the shared engine. `doctor` reports formats, extractors, renderers, OCR backends and missing models. Generic authenticated acquisition accepts only an origin allow-list and an environment-variable credential reference. Login pages, redirects and rejected credentials remain unresolved sources. Transient HTTP failures use bounded retries; authentication failures do not retry. Authenticated responses are bounded at 64 MiB.
 
+## 14. Local OCR
+
+Documenter uses the installed Xberg Tesseract path for local OCR. OCR stays offline after model provisioning. The default English and orientation models are verified through the signed Debian package installation and exact installed-file digests. The current default is the distribution model profile, not `tessdata_best`.
+
+```bash
+node scripts/documenter.mjs ocr status --root "$PWD"
+node scripts/documenter.mjs ocr doctor --root "$PWD" --fixture /path/to/image-only-scan.png --expected-phrase "Known phrase"
+node scripts/documenter.mjs ocr models list --root "$PWD"
+node scripts/documenter.mjs ocr models verify --root "$PWD"
+node scripts/documenter.mjs ocr test --root "$PWD" --file /path/to/scan.png --expected-phrase "Known phrase"
+```
+
+`doctor` requires a real raster fixture. Missing or corrupt models return `OCR_REQUIRED` or a checksum failure. Model installation accepts a local verified `.traineddata` file and never downloads assets during extraction. OCR receipts record backend, languages, model digest, confidence, source identity and extraction configuration identity. OCR processing is separate from LLM token usage.
+
 External output, semantic search, proprietary reference adapters, and automatic section merging are not core capabilities. The engine preserves non-Markdown assets and reports unsupported formats.
 
-## 14. Manage pages and recover
+## 15. Manage pages and recover
 
 Accept only after an independent page review has checked the current bytes and affected claims. The deterministic engine records the accepted hash; it does not supply semantic review itself.
 ```bash
@@ -870,8 +886,9 @@ The path checks protect ordinary workflows but do not form a sandbox against an 
 
 Documenter 2.0.0 keeps the five v1 actions and adds guarded lifecycle actions:
 `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`,
-`resume`, `archives`, `restore`, `page`, `style`, `doctor` and `details`.
+`resume`, `archives`, `restore`, `page`, `style`, `doctor`, `details` and `ocr`.
 
+OCR operations are `status`, `doctor`, `test`, `models-list`, `models-verify`, `models-install` and `models-remove`. They use the pinned Xberg Tesseract path, local verified model assets and bounded receipts. Extraction does not download models.
 Preview is read-only. It resolves the repository-relative destination, exact
 front-page policy and Existing/Fresh style without creating state. A planned
 run records source and document hashes, style identity, destination, selected
