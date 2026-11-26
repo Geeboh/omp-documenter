@@ -21,7 +21,9 @@ async function main() {
   const mimeType = args.shift() || undefined;
   const filename = args.shift() || path.basename(file);
   const bytes = new Uint8Array(fs.readFileSync(file));
-  const result = await xberg.extract({ kind: 'bytes', bytes, mimeType, filename }, { useCache: false, enableQualityProcessing: false });
+  const configJson = args.shift();
+  const config = configJson ? JSON.parse(configJson) : { useCache: false, enableQualityProcessing: false };
+  const result = await xberg.extract({ kind: 'bytes', bytes, mimeType, filename }, config);
   process.stdout.write(JSON.stringify(result));
 }
 try { await main(); } catch (error) { process.stderr.write(`${error.stack || error}\n`); process.exitCode = 1; }

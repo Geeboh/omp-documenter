@@ -3,12 +3,11 @@
 import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { runOperation } from "../lib/engine.mjs";
-
 const actions = new Set([
   "scan", "status", "record", "publish", "check",
   "preview", "plan", "initial", "maintain", "overhaul",
   "archive", "stage", "validate", "promote", "resume",
-  "archives", "restore", "page", "style", "doctor", "details", "scan-v2"
+  "archives", "restore", "page", "style", "doctor", "details", "scan-v2", "ocr"
 ]);
 
 const valueFields = {
@@ -17,7 +16,11 @@ const valueFields = {
   "--run-id": "runId", "--archive-id": "archiveId", "--operation": "operation",
   "--path": "path", "--new-path": "newPath", "--expected-sha256": "expectedSha256",
   "--source": "source", "--mode": "mode", "--result-id": "resultId",
-  "--offset": "offset", "--limit": "limit", "--reason": "reason"
+  "--offset": "offset", "--limit": "limit", "--reason": "reason",
+  "--file": "file", "--fixture": "fixture", "--expected-phrase": "expectedPhrase",
+  "--model-root": "modelRoot", "--model-id": "id", "--source-path": "sourcePath",
+  "--language": "language", "--backend": "backend", "--model-sha256": "modelSha256",
+  "--package-sha256": "packageSha256"
 };
 
 const help = `OMP Documenter 2.0.0
@@ -32,6 +35,7 @@ Usage:
   node scripts/documenter.mjs stage --root PATH --run-id RUN_ID --input FILE
   node scripts/documenter.mjs restore --root PATH --archive-id ARCHIVE_ID [--dry-run]
   node scripts/documenter.mjs archives|doctor|details --root PATH [options]
+  node scripts/documenter.mjs ocr status|doctor|test|models-list|models-verify [options]
   node scripts/documenter.mjs page --root PATH --operation OP --path PAGE [--new-path PAGE]
   node scripts/documenter.mjs style --root PATH --operation show|import|refresh [--source PATH]
 
@@ -40,6 +44,8 @@ Options:
   --style existing|fresh, --style-from PATH, --dry-run, --strict
   --input FILE, --run-id ID, --archive-id ID, --path PATH, --new-path PATH
   --expected-sha256 HASH, --source PATH, --mode MODE, --result-id ID
+  --file PATH, --fixture PATH, --expected-phrase TEXT, --model-root PATH
+  --model-id ID, --source-path PATH, --language CODE, --backend ID
 
 The deterministic engine does not generate prose. External output, semantic search
 and automatic section merging remain unsupported core capabilities.
@@ -55,6 +61,10 @@ async function main() {
   const action = args.shift();
   if (!actions.has(action)) throw new Error(`Unknown action: ${action}. Use --help.`);
   const input = {};
+  if (action === "ocr") {
+    const first = args.shift() ?? "status";
+    input.operation = first === "models" ? `models-${args.shift() ?? "list"}` : first;
+  }
   let root = process.cwd();
   let inputPath;
   let strict = false;
