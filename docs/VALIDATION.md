@@ -53,7 +53,7 @@ This small exercise is evidence that the skill can follow the workflow on a real
 The adapter follows current upstream documentation for an extension factory, `omp.extensions`, conventional sibling skills, command/tool registration, injected `pi.zod`, `sendUserMessage` scheduling and `isError` results. Relevant source links are listed in [architecture](ARCHITECTURE.md#upstream-references).
 
 The adapter's mock-host tests are supplemented by live OMP 19.2.1 extension loading and read/write tool invocations. An unrelated auto-loaded plugin reports an API compatibility error; busy scheduling, approval prompts, and worker fallback remain unqualified. Bun 1.4.5 is qualified for the product suite.
-Native usage measurement discovers OMP session JSONL without Tersio. The current local run synchronized 6,058 records with provider/model/day totals, cache rate and measured cost. CPU, memory and cross-runtime benchmark measurements remain limited.
+The isolated OMP launcher also returned public OCR `status` and `doctor` reports in JSON mode using the repository-local fixture. Normal-profile scheduling and unrelated-plugin compatibility remain partial.
 
 ## Limits that must remain visible
 
