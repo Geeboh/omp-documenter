@@ -2,3 +2,4 @@ node_modules/
 .documenter/
 coverage/
 *.log
+.documenter/local-artifacts/
