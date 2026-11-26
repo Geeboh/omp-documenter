@@ -97,7 +97,7 @@ test('authenticated acquisition scopes credentials, rejects login pages, and ext
     }
     if (request.url === '/login') {
       response.writeHead(200, { 'content-type': 'text/html' });
-      response.end('<form action="/login"><input type="password"></form>');
+      response.end(`${'x'.repeat(5000)}<form action="/login"><input type="password"></form>`);
       return;
     }
     response.writeHead(401); response.end('no');
@@ -107,6 +107,10 @@ test('authenticated acquisition scopes credentials, rejects login pages, and ext
   process.env.DOCUMENTER_TEST_TOKEN = 'test-token';
   t.after(() => delete process.env.DOCUMENTER_TEST_TOKEN);
   const origin = `http://127.0.0.1:${server.address().port}`;
+  const aborted = new AbortController();
+  aborted.abort();
+  const cancelled = await acquireAuthenticatedSource({ url: `${origin}/protected`, credentialEnv: 'DOCUMENTER_TEST_TOKEN', allowedOrigins: [origin], signal: aborted.signal });
+  assert.equal(cancelled.code, 'SOURCE_CANCELLED');
   const redirected = await acquireAuthenticatedSource({ url: `${origin}/redirect`, credentialEnv: 'DOCUMENTER_TEST_TOKEN', allowedOrigins: [origin] });
   assert.equal(redirected.ok, true);
   assert.equal(redirected.source.redirects, 1);
