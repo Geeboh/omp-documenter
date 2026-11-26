@@ -26,9 +26,14 @@ test('model provisioning is atomic, idempotent by identity, verifiable and remov
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'documenter-ocr-model-'));
   const bytes = fs.readFileSync(model);
   const expectedSha256 = digest(bytes);
-  const first = installOcrModel(root, { id: 'eng', sourcePath: model, expectedSha256, packageSha256: 'apt-package-provenance' });
+  const first = installOcrModel(root, { id: 'eng', sourcePath: model, expectedSha256, packageSha256: 'b'.repeat(64) });
   assert.equal(first.ok, true);
   assert.equal(verifyOcrModels(root, { modelRoot: path.join(root, '.documenter/ocr/models') }).models.find(item => item.id === 'eng').verified, true);
+  const manifestPath = path.join(root, '.documenter/ocr/models.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  manifest.models[0].expectedSha256 = '0'.repeat(64);
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  assert.equal(testOcr(root, { file: fixture }).code, 'OCR_MODEL_UNVERIFIED');
   assert.throws(() => installOcrModel(root, { id: 'eng', sourcePath: model, expectedSha256: '0'.repeat(64) }), /checksum mismatch/);
   assert.equal(removeOcrModel(root, 'eng').removed, true);
   fs.rmSync(root, { recursive: true, force: true });

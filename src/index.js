@@ -149,7 +149,7 @@ export default function documenter(pi) {
         }
         const { input, strict } = parseCommandOptions(words, mode);
         const result = await runOperation(mode, { root: resolveRoot(ctx.cwd), input, strict });
-        pi.sendMessage({ customType: "documenter-report", content: formatReport(result), display: true }, { triggerTurn: false });
+        pi.sendMessage({ customType: "documenter-report", content: mode === "ocr" ? rendered(result) : formatReport(result), display: true }, { triggerTurn: false });
       } catch (error) { ctx.ui.notify(`Documenter: ${error instanceof Error ? error.message : String(error)}`, "error"); }
     }
   });
