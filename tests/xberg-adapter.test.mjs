@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import http from 'node:http';
-import { acquireAuthenticatedSource, extractAuthenticatedSource, extractXbergFile, probeXberg } from '../lib/xberg-adapter.mjs';
+import { acquireAuthenticatedSource, extractAuthenticatedSource, extractXbergBatch, extractXbergFile, probeXberg } from '../lib/xberg-adapter.mjs';
 import { runOperation } from '../lib/engine.mjs';
 
 const pdf = '/code/GT-N7105T/android-work/src/cts/tests/pdf/module/res/raw/sample_test.pdf';
@@ -26,6 +26,18 @@ test('Xberg extracts real PDF and DOCX fixtures through the adapter', t => {
   assert.equal(pdfResult.receipt.source.sha256.length, 64);
   assert.equal(docxResult.receipt.backend.id, '@xberg-io/xberg');
 });
+test('batch extraction preserves successes and classifies a failing source', t => {
+  if (!fs.existsSync(pdf) || !fs.existsSync(docx)) return t.skip('repository fixtures unavailable');
+  const missing = `/tmp/${t.name.replace(/[^A-Za-z0-9_-]/g, '-')}-missing.pdf`;
+  const result = extractXbergBatch([pdf, docx, missing]);
+  assert.equal(result.ok, false);
+  assert.equal(result.status, 'partial');
+  assert.deepEqual(result.summary, { total: 3, succeeded: 2, failed: 1 });
+  assert.equal(result.results[0].ok, true);
+  assert.equal(result.results[1].ok, true);
+  assert.equal(result.results[2].ok, false);
+});
+
 test('public style operation persists Xberg extraction evidence for explicit PDF style', t => {
   if (!fs.existsSync(pdf)) return t.skip('repository fixture unavailable');
   const root = fs.mkdtempSync('/tmp/documenter-xberg-engine-');
