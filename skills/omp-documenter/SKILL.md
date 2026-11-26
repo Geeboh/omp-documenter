@@ -83,3 +83,15 @@ Return one of these outcomes:
 - **Blocked:** a specific missing capability or decision prevents necessary work. Finish all independent work before asking for that decision.
 
 Report the mode, source snapshot, pages created or updated, pages preserved, coverage denominators and exclusions, verification actually performed, open unknowns, and next actions. Separate mechanical checks from semantic and editorial review. Never claim "100% documented" without an explicit, complete denominator and current evidence.
+
+## Documenter 2 lifecycle
+
+Documenter 2 keeps the low-level five actions and adds deterministic lifecycle actions:
+`preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`,
+`archives`, `restore`, `page`, `style`, `doctor`, and `details`.
+
+Use `/documenter overhaul --dest docs --frontpage all` for a complete authorised rewrite. Resolve Existing style before archive. The engine does not generate prose on its own. The coordinating workflow stages reviewed pages, then validates and promotes them through guarded transitions.
+
+`--dest` is repository-relative. `--frontpage` accepts `none`, `root`, or `all`. Without a style option, use the saved Existing profile, then usable existing project documentation, then Fresh. `--style-from` is explicit and must fail visibly when inaccessible.
+
+Archives and staging are historical or working material. They do not count as active evidence or coverage. A changed live page is a conflict. Use `page accept`, `page release`, `page rename`, or `page retire` to resolve ownership deliberately. Use `doctor`, `resume`, `archives`, and `restore` for recovery.

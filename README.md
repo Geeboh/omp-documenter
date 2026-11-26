@@ -8,7 +8,7 @@ Documentation must be clear, consistent and user friendly. Every factual explana
 
 ## Start here
 
-1. Install or unpack this package into a permanent directory outside the repository you want to document.
+1. Install or unpack this package into a permanent directory outside the repository you want to document. Run `npm install --omit=dev` in that directory to install the pinned native Xberg backend. If the backend is unavailable, Markdown and plain-text workflows still work.
 2. Link it to OMP:
 
    ```bash
@@ -68,11 +68,14 @@ Parallel component reviews default to **automatic, with up to three workers plus
 - [Roadmap](docs/ROADMAP.md): useful next improvements, in priority order.
 - [Agent skill](skills/omp-documenter/SKILL.md): the instructions OMP follows.
 
-## Compatibility
+## Compatibility and v2 lifecycle
 
-The OMP adapter follows upstream interfaces checked on **16 November 2026**. It uses `registerCommand`, `registerTool`, `pi.zod`, `sendUserMessage` and the `omp.extensions` package manifest. The standalone engine requires **Node.js 20 or later** and has no third-party runtime dependencies. Git is used when available; a filesystem inventory supports non-Git folders.
+Documenter 2.0.0 requires Node.js 22 or later. The local qualification run used Node.js 22.23.5, 24.22.3, and 26.13.1, plus Bun 1.4.5. The focused current run passes 81 tests on Node.js 24.22.3, including real Xberg PDF/DOCX extraction and generic authenticated acquisition.
 
-OMP host integration must be verified against the installed OMP version. Tests with a mock host establish adapter behavior, not real OMP loading or provider compatibility. See [validation](docs/VALIDATION.md) for the precise evidence.
+The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, and `details` actions. Use the repository-relative lifecycle documented in [the user guide](docs/USER-GUIDE.md) and [the documentation-set reference](docs/DOCUMENTATION-SET.md).
+
+External output, semantic search, automatic section merging and proprietary providers remain unsupported core capabilities. PDF and DOCX style sources are qualified through pinned `@xberg-io/xberg` 1.5.4. Generic authenticated acquisition is origin-scoped and rejects login pages, redirects and rejected credentials. OCR models, visual layout fidelity and named-provider login remain unqualified.
+If another OMP plugin fails during automatic discovery, use `node scripts/omp-documenter-host.mjs` to load Documenter with automatic extensions disabled. This does not uninstall or modify other plugins.
 
 ## What a passing check means
 

@@ -50,7 +50,7 @@ node /absolute/plugin/scripts/documenter.mjs publish --root /absolute/repository
 node /absolute/plugin/scripts/documenter.mjs check --root /absolute/repository --strict
 ```
 
-`record` and `publish` require `--input`. The CLI accepts a regular JSON input file of at most 4 MiB. The agent tool imposes the same size limit on its serialized input. Exit status is 0 for successful operations, 1 for errors, and 2 for a failed check or a protected-content publishing conflict.
+`record` and `publish` require `--input`. The standalone CLI accepts a regular JSON input file of at most 16 MiB. The OMP tool limits serialized `inputJson` to 4 MiB. Exit status is 0 for successful operations, 1 for errors, and 2 for a failed check or a protected-content publishing conflict.
 
 ## State files
 
@@ -239,3 +239,82 @@ Only one cooperating engine writer can hold `.documenter/write.lock`. Parallel r
 Writes use a temporary file, synchronization and atomic replacement or an exclusive new-file operation. Replacements save prior page bytes in a journal. Page content and its ownership/ledger records are separate filesystem writes, so a crash can leave a prepared journal. Inspect the journal, current hashes and protected content before a deliberate repair.
 
 The path checks protect ordinary workflows but do not form a sandbox against an adversarial process racing filesystem changes. An external editor can still change files outside the cooperative lock. Current hashes are checked again where implemented, and the final run must include a fresh integrity check.
+
+## V2 lifecycle actions
+
+Documenter 2.0.0 keeps the five v1 actions and adds guarded lifecycle actions:
+`preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`,
+`resume`, `archives`, `restore`, `page`, `style`, `doctor` and `details`.
+
+Preview is read-only. It resolves the repository-relative destination, exact
+front-page policy and Existing/Fresh style without creating state. A planned
+run records source and document hashes, style identity, destination, selected
+pages and an idempotency key. Archive, stage, validate and promote are separate
+durable transitions. Promotion refuses source or document drift and records a
+per-page journal.
+
+Example:
+
+```bash
+node scripts/documenter.mjs preview --root "$PWD" --dest "Project Documentation" --frontpage all
+node scripts/documenter.mjs plan --root "$PWD" --dest docs --frontpage root --style fresh
+```
+
+Create the staged page input as JSON. A path must be inside the planned destination or be an exact selected front page in the immutable plan.
+
+```json
+{"pages":[{"path":"docs/README.md","content":"# Project\n"}]}
+```
+
+Then run:
+
+```bash
+node scripts/documenter.mjs stage --root "$PWD" --run-id RUN_ID --input staged.json
+node scripts/documenter.mjs validate --root "$PWD" --run-id RUN_ID
+node scripts/documenter.mjs promote --root "$PWD" --run-id RUN_ID
+```
+Use the returned `runId` with `archive`, `stage`, `validate`, `promote` and
+`resume`. Use `archives` to inspect verified originals and `restore` with an
+explicit archive ID. `page` supports `accept`, `release`, `rename` and
+`retire`; `style` supports `show`, `import` and `refresh`.
+
+The v2 engine writes repository-local `.documenter/sets.json`, styles, runs,
+archives and generation manifests. External output destinations are rejected.
+The engine does not generate prose. A staged page must be supplied by the
+coordinating documentation workflow and remains subject to exact-byte checks.
+
+## Example and renderer checks
+
+Run explicit examples through argv arrays. The harness does not interpret shell syntax.
+
+```bash
+node scripts/verify-examples.mjs --root "$PWD" --input examples.json --output example-receipt.json
+node scripts/renderer-check.mjs --root "$PWD"
+```
+
+Example receipts record command, working directory, exit status, bounded output and output hash. The harness does not claim network or filesystem sandboxing. Renderer detection reports project configuration; renderer-specific anchors remain unverified until an explicit project check runs.
+
+`scan-v2` also returns bounded JavaScript-family and Python declaration inventories. These are non-exhaustive. Dynamic dispatch, decorators, generated code, reflection and runtime registration remain explicit limitations.
+
+## Optional expanded capabilities
+
+The expanded release includes deterministic, guarded optional adapters:
+
+```bash
+node scripts/optional-capabilities.mjs search search.json
+node scripts/optional-capabilities.mjs merge merge.json
+node scripts/optional-capabilities.mjs external external-output.json
+```
+
+Search is lexical fallback with evidence links, not embedding proof. Merge is heading-identity three-way merge with explicit conflicts. External output requires `allowExternalOutput: true`, rejects traversal and overwrite, and reports per-file atomicity limits.
+
+## Native token usage
+
+Documenter has its own optional usage ledger. It does not require Tersio.
+
+```bash
+node scripts/documenter-usage.mjs sync --root "$PWD" --input host-usage.jsonl
+node scripts/documenter-usage.mjs stats --root "$PWD"
+```
+
+The sync accepts explicit JSONL usage records, normalizes provider fields into input, output, cache-read, cache-write, and cost buckets, skips unchanged files, deduplicates stable IDs, and stores local state under `.documenter/`. Missing host usage remains `unavailable`; text-length estimates are never presented as measured tokens.

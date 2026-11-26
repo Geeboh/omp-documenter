@@ -21,8 +21,8 @@ function host() {
 
 test("registration has no filesystem or agent-turn side effects", () => {
   const { captured } = host();
-  assert.deepEqual(captured.tools.map(t => t.name), ["documenter_state"]);
-  assert.equal(captured.tools[0].approval, "write");
+  assert.deepEqual(captured.tools.map(t => t.name), ["documenter_state", "documenter_inspect"]);
+  assert.deepEqual(captured.tools.map(t => t.approval), ["write", "read"]);
   assert.deepEqual(captured.commands.map(c => c.name), ["documenter"]);
   assert.equal(captured.prompts.length, 0);
   assert.equal(captured.messages.length, 0);

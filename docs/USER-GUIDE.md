@@ -1,6 +1,6 @@
 # OMP Documenter user guide
 
-Version 1.0.0 · 16 November 2026
+Version 2.0.0 · 26 November 2026
 
 ## Contents
 
@@ -16,6 +16,8 @@ Version 1.0.0 · 16 November 2026
 10. [Git workflow](#10-git-workflow)
 11. [Troubleshoot and recover](#11-troubleshoot-and-recover)
 12. [Definition of a useful completed run](#12-definition-of-a-useful-completed-run)
+13. [Rebuild a documentation set](#13-rebuild-a-documentation-set)
+14. [Manage pages and recover](#14-manage-pages-and-recover)
 
 ## 1. What Documenter does
 
@@ -25,14 +27,14 @@ The plugin has three parts. The **skill** explains how to investigate and write.
 
 Clear writing is a required outcome. Procedures should tell the reader where to run commands, what is needed first, what each action does, what success looks like and how to recover when it fails. An API reference should explain the contract and examples, not merely repeat a function name.
 
-Documenter does not need an external documentation service or database. Its local engine has no third-party runtime dependencies. It does not install project dependencies or start applications on its own.
+Documenter’s core engine has one pinned runtime dependency, `@xberg-io/xberg` 1.5.4, for broad document extraction. Markdown and plain-text workflows remain usable when its native backend is unavailable. Documenter does not install project dependencies or start applications on its own.
 
 ## 2. Install the plugin
 
 ### Prerequisites
 
 - An existing OMP installation supporting the extension interfaces listed in [validation](VALIDATION.md).
-- Node.js 20 or later for the supplied installer, standalone CLI and package tests.
+- Node.js 22 or later for the supplied installer, standalone CLI and package tests.
 - Read access to the repository, and write access to the chosen documentation and state directories.
 - Git available on `PATH` when the target is a Git repository. Non-Git folders are supported with a filesystem inventory.
 
@@ -46,20 +48,26 @@ git --version
 
 ### Install from the self-contained installer
 
-The distribution includes `omp-documenter-1.0.0-install.mjs`. It contains the package files and their hashes. It writes to a new directory, verifies the contents, and does not contact the network or change OMP settings.
+The distribution includes `omp-documenter-2.0.0-install.mjs`. It contains the package files and their hashes. It writes to a new directory, verifies the contents, and does not contact the network or change OMP settings.
 
 Run this from the directory where you downloaded the installer:
 
 ```bash
-node ./omp-documenter-1.0.0-install.mjs "$HOME/.local/share/omp-documenter-1.0.0"
+node ./omp-documenter-2.0.0-install.mjs "$HOME/.local/share/omp-documenter-2.0.0"
 ```
 
-The installer refuses an existing destination so it cannot overwrite a previous installation. If the chosen directory already exists, inspect it and choose a new destination. Keep the installed directory outside the repository being documented.
+After installation, install the pinned runtime dependency before linking:
+
+```bash
+cd "$HOME/.local/share/omp-documenter-2.0.0"
+npm install --omit=dev
+```
+
 
 Link the package to OMP:
 
 ```bash
-omp plugin link "$HOME/.local/share/omp-documenter-1.0.0"
+omp plugin link "$HOME/.local/share/omp-documenter-2.0.0"
 ```
 
 Start a new OMP session from the repository root:
@@ -77,7 +85,7 @@ If you do not want a persistent plugin link, load the entire package directory f
 
 ```bash
 cd /path/to/your/project
-omp --extension "$HOME/.local/share/omp-documenter-1.0.0"
+omp --extension "$HOME/.local/share/omp-documenter-2.0.0"
 ```
 
 Use the package directory so OMP can discover the bundled skill. Loading only `src/index.js` is not the recommended installation method.
@@ -335,3 +343,52 @@ A run is useful when it produces navigable documentation, identifies what it has
 A fully verified scope requires current evidence, reviewed documentation pages, covered components and symbol checklists, coherent architecture and workflows, appropriate examples, valid navigation and no undisclosed gaps. When evidence is unavailable, finish the run as **complete with gaps**, list the questions and next steps, and avoid claiming complete verification.
 
 Manual user testing is not a prerequisite for finishing the documentation run. If a behavior cannot be executed in the available environment, describe the static evidence and mark the runtime result unverified. Do not describe an unexecuted command as tested.
+
+## 13. Rebuild a documentation set
+
+Documenter 2 records a stable documentation-set identity. The destination and front-page policy are repository-relative and persist in `.documenter/sets/`.
+
+Preview before writing:
+
+```bash
+node scripts/documenter.mjs preview --root "$PWD" --dest "Project Documentation" --frontpage all
+```
+
+Use `overhaul` for a complete guarded run. The deterministic engine archives selected originals, but the coordinating OMP workflow supplies reviewed staged prose.
+
+```bash
+node scripts/documenter.mjs plan --root "$PWD" --dest docs --frontpage all --style existing
+node scripts/documenter.mjs archive --root "$PWD" --run-id RUN_ID
+node scripts/documenter.mjs stage --root "$PWD" --run-id RUN_ID --input staged.json
+node scripts/documenter.mjs validate --root "$PWD" --run-id RUN_ID
+node scripts/documenter.mjs promote --root "$PWD" --run-id RUN_ID
+```
+
+`--frontpage` accepts `none`, `root`, or `all`. `--style existing` reuses an adopted profile or usable project documentation. `--style fresh` selects the versioned built-in profile. `--style-from` requires an accessible local text, Markdown, or HTML source and fails visibly when extraction is unavailable.
+Explicit PDF and DOCX style sources use the pinned `@xberg-io/xberg` 1.5.4 backend through the shared engine. `doctor` reports formats, extractors, renderers, OCR backends and missing models. Generic authenticated acquisition accepts only an origin allow-list and an environment-variable credential reference. Login pages, redirects and rejected credentials remain unresolved sources. Transient HTTP failures use bounded retries; authentication failures do not retry. Authenticated responses are bounded at 64 MiB.
+
+External output, semantic search, proprietary reference adapters, and automatic section merging are not core capabilities. The engine preserves non-Markdown assets and reports unsupported formats.
+
+## 14. Manage pages and recover
+
+Accept only after an independent page review has checked the current bytes and affected claims. The deterministic engine records the accepted hash; it does not supply semantic review itself.
+```bash
+node scripts/documenter.mjs page --root "$PWD" --operation accept --path docs/guide.md --expected-sha256 HASH
+node scripts/documenter.mjs page --root "$PWD" --operation release --path docs/guide.md --expected-sha256 HASH
+node scripts/documenter.mjs archives --root "$PWD"
+node scripts/documenter.mjs doctor --root "$PWD"
+node scripts/documenter.mjs resume --root "$PWD" --run-id RUN_ID
+node scripts/documenter.mjs restore --root "$PWD" --archive-id ARCHIVE_ID --dry-run
+```
+
+Promotion uses per-file guards and a journal. A changed page creates a conflict. Preserve the newer edit and resolve it through the page lifecycle. Do not use `git reset --hard`, `git clean -fd`, or `rm -rf .documenter` for recovery.
+
+## 15. Isolate OMP extension loading
+
+If another installed OMP plugin fails during automatic discovery, do not uninstall or modify it. Start Documenter through its isolated launcher:
+
+```bash
+node /path/to/omp-documenter/scripts/omp-documenter-host.mjs
+```
+
+The launcher passes `--no-extensions` and explicitly loads Documenter. Additional extensions can be supplied deliberately after the launcher arguments. The wrapper does not change OMP configuration or installed plugins.

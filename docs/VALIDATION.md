@@ -1,15 +1,15 @@
 # Validation and limits
 
-## Validation environment
+## Current v2 candidate
 
-- Package version: 1.0.0.
-- Validation date: 16 November 2026.
-- Runtime: Node.js v24.22.1 on Linux.
+- Package version: 2.0.0.
+- Candidate working revision: see the workspace-only `.overhaul/documenter-v2/work/RELEASE-EVIDENCE.md`; release artifacts are generated separately and `.overhaul` is not shipped.
+- Runtime: Node.js v24.22.3 on Linux x64.
 - Runtime dependencies: Node built-ins; Git for Git-repository fixtures.
-- Automated suite: `node --test tests/*.test.mjs`.
-- Result: **39 tests passed; 0 failed.**
+- Automated suite: `npm test`.
+- Result: **70 tests passed; 0 failed.**
 
-The engine targets Node.js 20 or later, but this session's execution evidence is for Node 24.22.1. A Node 20 compatibility run and a live OMP/Bun integration run were not available in this workspace.
+The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the full suite. OMP 19.2.1 read/write tool qualification is partial. The historical v1 result below is retained as baseline evidence, not current v2 proof.
 
 ## What the automated tests establish
 
@@ -52,7 +52,7 @@ This small exercise is evidence that the skill can follow the workflow on a real
 
 The adapter follows current upstream documentation for an extension factory, `omp.extensions`, conventional sibling skills, command/tool registration, injected `pi.zod`, `sendUserMessage` scheduling and `isError` results. Relevant source links are listed in [architecture](ARCHITECTURE.md#upstream-references).
 
-This is **source-backed integration design plus a mock-host test**, not proof that the user's installed OMP release has already loaded the package. No OMP executable or Bun runtime was available for a live host run in this workspace. The package leaves that limitation explicit; it does not require user testing before the documentation workflow can finish accessible work.
+The adapter's mock-host tests are supplemented by live OMP 19.2.1 extension loading and read/write tool invocations. An unrelated auto-loaded plugin reports an API compatibility error; busy scheduling, approval prompts, and worker fallback remain unqualified. Bun 1.4.5 is qualified for the product suite.
 
 ## Limits that must remain visible
 
