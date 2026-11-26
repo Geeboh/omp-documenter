@@ -53,7 +53,13 @@ This small exercise is evidence that the skill can follow the workflow on a real
 The adapter follows current upstream documentation for an extension factory, `omp.extensions`, conventional sibling skills, command/tool registration, injected `pi.zod`, `sendUserMessage` scheduling and `isError` results. Relevant source links are listed in [architecture](ARCHITECTURE.md#upstream-references).
 
 The adapter's mock-host tests are supplemented by live OMP 19.2.1 extension loading and read/write tool invocations. An unrelated auto-loaded plugin reports an API compatibility error; busy scheduling, approval prompts, and worker fallback remain unqualified. Bun 1.4.5 is qualified for the product suite.
-The isolated OMP launcher also returned public OCR `status` and `doctor` reports in JSON mode using the repository-local fixture. Normal-profile scheduling and unrelated-plugin compatibility remain partial.
+The isolated OMP launcher returned public OCR `status` and `doctor` reports and a live `documenter_inspect status` tool result in JSON mode using the repository-local fixture. Normal-profile scheduling, approval prompts, worker fallback and unrelated-plugin compatibility remain partial.
+
+## Benchmark qualification
+
+The starting profile uses 50 source files and 100 broken links, five alternating repetitions per operation, a three-worker controller, a four-core benchmark budget, a 1 GiB memory budget and a 1 MiB result limit. Pass thresholds are five successful repetitions, status median under 100 ms, check median under 150 ms, RSS delta under 64 MiB, and exact fixture totals.
+
+On Node.js v24.22.3 Linux x64 with 16 logical CPUs, 384 GiB RAM and no swap, `status` measured a 7.837 ms median and `check` a 13.609 ms median. Maximum RSS deltas were 4.0 MiB and 3.4 MiB. The fixture is synthetic. Host load was elevated by a concurrent local llama server, so these are smoke thresholds, not capacity claims. CPU profiling identified engine traversal plus synchronous filesystem and process work as the observed limiter.
 
 ## Limits that must remain visible
 
