@@ -91,7 +91,7 @@ The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It add
 
 External output, semantic search, automatic section merging, and proprietary style formats remain unsupported or unqualified core capabilities. Explicit missing style sources fail visibly.
 
-OMP host integration remains a separate qualification result. Mock-host tests and installed skill discovery do not establish a live workflow run.
+If another OMP plugin fails during automatic discovery, use `node scripts/omp-documenter-host.mjs` to load Documenter with automatic extensions disabled. This does not uninstall or modify other plugins.
 
 ## What a passing check means
 
@@ -476,6 +476,16 @@ node scripts/documenter.mjs restore --root "$PWD" --archive-id ARCHIVE_ID --dry-
 ```
 
 Promotion uses per-file guards and a journal. A changed page creates a conflict. Preserve the newer edit and resolve it through the page lifecycle. Do not use `git reset --hard`, `git clean -fd`, or `rm -rf .documenter` for recovery.
+
+## 15. Isolate OMP extension loading
+
+If another installed OMP plugin fails during automatic discovery, do not uninstall or modify it. Start Documenter through its isolated launcher:
+
+```bash
+node /path/to/omp-documenter/scripts/omp-documenter-host.mjs
+```
+
+The launcher passes `--no-extensions` and explicitly loads Documenter. Additional extensions can be supplied deliberately after the launcher arguments. The wrapper does not change OMP configuration or installed plugins.
 
 ## Canonical source: docs/ARCHITECTURE.md
 

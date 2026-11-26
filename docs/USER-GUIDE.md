@@ -375,3 +375,13 @@ node scripts/documenter.mjs restore --root "$PWD" --archive-id ARCHIVE_ID --dry-
 ```
 
 Promotion uses per-file guards and a journal. A changed page creates a conflict. Preserve the newer edit and resolve it through the page lifecycle. Do not use `git reset --hard`, `git clean -fd`, or `rm -rf .documenter` for recovery.
+
+## 15. Isolate OMP extension loading
+
+If another installed OMP plugin fails during automatic discovery, do not uninstall or modify it. Start Documenter through its isolated launcher:
+
+```bash
+node /path/to/omp-documenter/scripts/omp-documenter-host.mjs
+```
+
+The launcher passes `--no-extensions` and explicitly loads Documenter. Additional extensions can be supplied deliberately after the launcher arguments. The wrapper does not change OMP configuration or installed plugins.

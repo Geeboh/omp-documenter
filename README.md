@@ -76,7 +76,7 @@ The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It add
 
 External output, semantic search, automatic section merging, and proprietary style formats remain unsupported or unqualified core capabilities. Explicit missing style sources fail visibly.
 
-OMP host integration remains a separate qualification result. Mock-host tests and installed skill discovery do not establish a live workflow run.
+If another OMP plugin fails during automatic discovery, use `node scripts/omp-documenter-host.mjs` to load Documenter with automatic extensions disabled. This does not uninstall or modify other plugins.
 
 ## What a passing check means
 
