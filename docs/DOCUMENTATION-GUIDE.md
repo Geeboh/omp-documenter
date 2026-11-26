@@ -460,6 +460,7 @@ node scripts/documenter.mjs promote --root "$PWD" --run-id RUN_ID
 ```
 
 `--frontpage` accepts `none`, `root`, or `all`. `--style existing` reuses an adopted profile or usable project documentation. `--style fresh` selects the versioned built-in profile. `--style-from` requires an accessible local text, Markdown, or HTML source and fails visibly when extraction is unavailable.
+Explicit PDF and DOCX style sources use the pinned `@xberg-io/xberg` 1.5.4 backend through the shared engine. `doctor` reports its formats, native extractors, renderers, OCR backends and missing optional models. Generic authenticated acquisition is available to integrations through origin-scoped bearer credentials referenced by environment variable; credentials never enter parser input or receipts. OCR models, visual fidelity and named-provider login remain unavailable unless separately qualified.
 
 External output, semantic search, proprietary reference adapters, and automatic section merging are not core capabilities. The engine preserves non-Markdown assets and reports unsupported formats.
 
