@@ -244,8 +244,9 @@ The path checks protect ordinary workflows but do not form a sandbox against an 
 
 Documenter 2.0.0 keeps the five v1 actions and adds guarded lifecycle actions:
 `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`,
-`resume`, `archives`, `restore`, `page`, `style`, `doctor` and `details`.
+`resume`, `archives`, `restore`, `page`, `style`, `doctor`, `details` and `ocr`.
 
+OCR operations are `status`, `doctor`, `test`, `models-list`, `models-verify`, `models-install` and `models-remove`. They use the pinned Xberg Tesseract path, local verified model assets and bounded receipts. Extraction does not download models.
 Preview is read-only. It resolves the repository-relative destination, exact
 front-page policy and Existing/Fresh style without creating state. A planned
 run records source and document hashes, style identity, destination, selected

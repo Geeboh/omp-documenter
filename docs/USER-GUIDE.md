@@ -17,7 +17,8 @@ Version 2.0.0 · 26 November 2026
 11. [Troubleshoot and recover](#11-troubleshoot-and-recover)
 12. [Definition of a useful completed run](#12-definition-of-a-useful-completed-run)
 13. [Rebuild a documentation set](#13-rebuild-a-documentation-set)
-14. [Manage pages and recover](#14-manage-pages-and-recover)
+14. [Local OCR](#14-local-ocr)
+15. [Manage pages and recover](#15-manage-pages-and-recover)
 
 ## 1. What Documenter does
 
@@ -367,9 +368,23 @@ node scripts/documenter.mjs promote --root "$PWD" --run-id RUN_ID
 `--frontpage` accepts `none`, `root`, or `all`. `--style existing` reuses an adopted profile or usable project documentation. `--style fresh` selects the versioned built-in profile. `--style-from` requires an accessible local text, Markdown, or HTML source and fails visibly when extraction is unavailable.
 Explicit PDF and DOCX style sources use the pinned `@xberg-io/xberg` 1.5.4 backend through the shared engine. `doctor` reports formats, extractors, renderers, OCR backends and missing models. Generic authenticated acquisition accepts only an origin allow-list and an environment-variable credential reference. Login pages, redirects and rejected credentials remain unresolved sources. Transient HTTP failures use bounded retries; authentication failures do not retry. Authenticated responses are bounded at 64 MiB.
 
+## 14. Local OCR
+
+Documenter uses the installed Xberg Tesseract path for local OCR. OCR stays offline after model provisioning. The default English and orientation models are verified through the signed Debian package installation and exact installed-file digests. The current default is the distribution model profile, not `tessdata_best`.
+
+```bash
+node scripts/documenter.mjs ocr status --root "$PWD"
+node scripts/documenter.mjs ocr doctor --root "$PWD" --fixture /path/to/image-only-scan.png --expected-phrase "Known phrase"
+node scripts/documenter.mjs ocr models list --root "$PWD"
+node scripts/documenter.mjs ocr models verify --root "$PWD"
+node scripts/documenter.mjs ocr test --root "$PWD" --file /path/to/scan.png --expected-phrase "Known phrase"
+```
+
+`doctor` requires a real raster fixture. Missing or corrupt models return `OCR_REQUIRED` or a checksum failure. Model installation accepts a local verified `.traineddata` file and never downloads assets during extraction. OCR receipts record backend, languages, model digest, confidence, source identity and extraction configuration identity. OCR processing is separate from LLM token usage.
+
 External output, semantic search, proprietary reference adapters, and automatic section merging are not core capabilities. The engine preserves non-Markdown assets and reports unsupported formats.
 
-## 14. Manage pages and recover
+## 15. Manage pages and recover
 
 Accept only after an independent page review has checked the current bytes and affected claims. The deterministic engine records the accepted hash; it does not supply semantic review itself.
 ```bash

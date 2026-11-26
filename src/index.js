@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { runOperation } from "../lib/engine.mjs";
 
 const skillPath = fileURLToPath(new URL("../skills/omp-documenter/SKILL.md", import.meta.url));
-const actions = ["scan", "status", "record", "publish", "check", "preview", "plan", "initial", "maintain", "overhaul", "archive", "stage", "validate", "promote", "resume", "archives", "restore", "page", "style", "doctor", "details", "scan-v2"];
+const actions = ["scan", "status", "record", "publish", "check", "preview", "plan", "initial", "maintain", "overhaul", "archive", "stage", "validate", "promote", "resume", "archives", "restore", "page", "style", "doctor", "details", "scan-v2", "ocr"];
 
 export function resolveRoot(cwd, requested = ".") {
   const base = realpathSync(cwd);
@@ -79,7 +79,7 @@ function commandWords(value) {
 
 function parseCommandOptions(words, mode) {
   const input = {}; let strict = false; const singleton = new Set();
-  const fields = { "--set": "setId", "--dest": "dest", "--frontpage": "frontpage", "--style": "style", "--style-from": "styleFrom", "--run-id": "runId", "--archive-id": "archiveId", "--path": "path", "--new-path": "newPath", "--expected-sha256": "expectedSha256", "--source": "source", "--mode": "mode", "--result-id": "resultId", "--operation": "operation" };
+  const fields = { "--set": "setId", "--dest": "dest", "--frontpage": "frontpage", "--style": "style", "--style-from": "styleFrom", "--run-id": "runId", "--archive-id": "archiveId", "--path": "path", "--new-path": "newPath", "--expected-sha256": "expectedSha256", "--source": "source", "--mode": "mode", "--result-id": "resultId", "--operation": "operation", "--file": "file", "--fixture": "fixture", "--expected-phrase": "expectedPhrase", "--model-root": "modelRoot", "--model-id": "id", "--source-path": "sourcePath", "--language": "language", "--backend": "backend", "--model-sha256": "modelSha256", "--package-sha256": "packageSha256" };
   while (words.length) {
     const option = words.shift();
     if (singleton.has(option)) throw new Error(`Duplicate option: ${option}`);
@@ -104,8 +104,8 @@ function parseCommandOptions(words, mode) {
 export default function documenter(pi) {
   if (!pi.zod || typeof pi.registerTool !== "function" || typeof pi.registerCommand !== "function") throw new Error("OMP Documenter requires the OMP extension API with pi.zod, registerTool and registerCommand. Use a compatible OMP release or the standalone Node CLI.");
   const z = pi.zod;
-  const readActions = ["status", "check", "preview", "archives", "doctor", "details", "style"];
-  const writeActions = actions.filter(action => !readActions.includes(action) && !["initial", "maintain"].includes(action));
+  const readActions = ["status", "check", "preview", "archives", "doctor", "details", "style", "ocr"];
+  const writeActions = [...actions.filter(action => !readActions.includes(action) && !["initial", "maintain"].includes(action)), "ocr"];
   const parameters = allowed => z.object({ action: z.enum(allowed), root: z.string().optional(), inputJson: z.string().optional(), strict: z.boolean().optional() });
   const registerStateTool = (name, label, approval, allowed) => pi.registerTool({
     name, label, description: `${label} Documenter operations with ${approval}-classified host approval.`, approval,
@@ -117,6 +117,7 @@ export default function documenter(pi) {
         if (params.inputJson && Buffer.byteLength(params.inputJson, "utf8") > 4 * 1024 * 1024) throw new Error("Input JSON exceeds the 4 MiB limit.");
         const input = params.inputJson === undefined ? undefined : JSON.parse(params.inputJson);
         if (name === "documenter_inspect" && params.action === "style" && input?.operation !== "show") throw new Error("Read-only style inspection accepts operation show only.");
+        if (name === "documenter_inspect" && params.action === "ocr" && ["models-install", "models-remove"].includes(input?.operation)) throw new Error("Read-only OCR inspection does not permit model installation or removal.");
         const result = await runOperation(params.action, { root, input, strict: params.strict ?? false, signal, onUpdate: _onUpdate });
         return { content: [{ type: "text", text: rendered(result) }], details: result, ...(result.ok === false ? { isError: true } : {}) };
       } catch (error) {
@@ -133,7 +134,7 @@ export default function documenter(pi) {
       let words;
       try { words = commandWords(args.trim()); } catch (error) { ctx.ui.notify(`Documenter: ${error.message}`, "error"); return; }
       const mode = words.shift() || "help";
-      const valid = new Set(["initial", "maintain", "status", "check", "preview", "plan", "overhaul", "archive", "stage", "validate", "promote", "resume", "archives", "restore", "page", "style", "doctor", "details"]);
+      const valid = new Set(["initial", "maintain", "status", "check", "preview", "plan", "overhaul", "archive", "stage", "validate", "promote", "resume", "archives", "restore", "page", "style", "doctor", "details", "ocr"]);
       if (!valid.has(mode)) { ctx.ui.notify("Usage: /documenter initial | maintain | status | check [--strict] | overhaul [options]", "info"); return; }
       try {
         if (mode === "initial" || mode === "maintain") {
@@ -141,9 +142,14 @@ export default function documenter(pi) {
           pi.sendUserMessage(workflowPrompt(mode, ctx.cwd), { attribution: "agent", ...(ctx.isIdle() ? {} : { deliverAs: "followUp" }) });
           return;
         }
+        if (mode === "ocr") {
+          const first = words.shift() || "status";
+          const operation = first === "models" ? `models-${words.shift() || "list"}` : first;
+          words.unshift("--operation", operation);
+        }
         const { input, strict } = parseCommandOptions(words, mode);
         const result = await runOperation(mode, { root: resolveRoot(ctx.cwd), input, strict });
-        pi.sendMessage({ customType: "documenter-report", content: formatReport(result), display: true }, { triggerTurn: false });
+        pi.sendMessage({ customType: "documenter-report", content: mode === "ocr" ? rendered(result) : formatReport(result), display: true }, { triggerTurn: false });
       } catch (error) { ctx.ui.notify(`Documenter: ${error instanceof Error ? error.message : String(error)}`, "error"); }
     }
   });

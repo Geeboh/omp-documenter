@@ -8,6 +8,7 @@
 - Added `@xberg-io/xberg` 1.5.4 PDF/DOCX extraction with source hashes, structure, locators, warnings and capability reports.
 - Added origin-scoped bearer acquisition with login-wall rejection, same-origin redirects, bounded transient retries and redacted authorization evidence.
 - Added mixed-batch extraction and persistent Xberg style evidence through the existing engine.
+- Added managed local Tesseract OCR status, doctor, model verification/provisioning, bounded receipts, missing-model failures and public CLI operations.
 
 Local implementation qualification passed on Node.js 22.23.5, 24.22.3, and 26.13.1. MIT licensing is declared in `LICENSE`. Live OMP workflow qualification remains partial.
 

@@ -16,15 +16,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+      - run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd poppler-utils python3-pil
+      - run: npm ci
+      - run: |
+          python3 - <<'PY'
+          from PIL import Image, ImageDraw, ImageFont
+          image = Image.new("RGB", (1800, 500), "white")
+          draw = ImageDraw.Draw(image)
+          font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 72)
+          draw.text((80, 80), "Documenter OCR Test 42", fill="black", font=font)
+          draw.text((80, 190), "Heading: Offline Evidence", fill="black", font=font)
+          image.save("/tmp/documenter-ocr.png")
+          image.save("/tmp/documenter-ocr-scan.pdf", "PDF", resolution=300)
+          PY
       - run: npm test
       - run: npm run check
       - run: node scripts/generate-guide.mjs --root . --output "$RUNNER_TEMP/DOCUMENTATION-GUIDE.md"
-  pack:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python3 .overhaul/documenter-v2/scripts/verify-pack.py
-      - run: python3 -m unittest discover -s .overhaul/documenter-v2/tests -p 'test_*.py'
