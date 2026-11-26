@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import * as xberg from '@xberg-io/xberg';
 
 function packageVersion() {
-  const packageFile = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'node_modules', '@xberg-io', 'xberg', 'package.json');
+  const packageFile = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'node_modules', '@xberg-io', 'xberg', 'package.json');
   return JSON.parse(fs.readFileSync(packageFile, 'utf8')).version;
 }
 

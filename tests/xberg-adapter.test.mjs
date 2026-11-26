@@ -30,6 +30,8 @@ test('adapter rejects empty batches and malformed credential references', async 
   assert.equal(extractXbergBatch([]).code, 'BATCH_EMPTY');
   const invalid = await acquireAuthenticatedSource({ url: 'http://127.0.0.1:1', credentialEnv: 'bad-name', allowedOrigins: ['http://127.0.0.1:1'] });
   assert.equal(invalid.code, 'AUTH_CREDENTIAL_REFERENCE_INVALID');
+  const missing = await acquireAuthenticatedSource({ url: 'http://127.0.0.1:1', credentialEnv: 'DOCUMENTER_MISSING_TOKEN', allowedOrigins: ['http://127.0.0.1:1'] });
+  assert.equal(missing.code, 'AUTH_CREDENTIAL_MISSING');
 });
 
 test('batch extraction preserves successes and classifies a failing source', t => {
@@ -113,6 +115,8 @@ test('authenticated acquisition scopes credentials, rejects login pages, and ext
   assert.equal(retried.source.attempts, 2);
   const acquired = await acquireAuthenticatedSource({ url: `${origin}/protected`, credentialEnv: 'DOCUMENTER_TEST_TOKEN', allowedOrigins: [origin] });
   assert.equal(acquired.ok, true);
+  const oversized = await acquireAuthenticatedSource({ url: `${origin}/protected`, credentialEnv: 'DOCUMENTER_TEST_TOKEN', allowedOrigins: [origin], maxBytes: 4 });
+  assert.equal(oversized.code, 'SOURCE_TOO_LARGE');
   assert.equal('authorization' in acquired.source.headers, false);
   assert.equal(acquired.source.authorizationContext.length, 64);
   const extracted = await extractAuthenticatedSource({ url: `${origin}/protected`, credentialEnv: 'DOCUMENTER_TEST_TOKEN', allowedOrigins: [origin], filename: 'style.txt', mimeType: 'text/plain' });
