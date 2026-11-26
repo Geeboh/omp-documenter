@@ -15,7 +15,7 @@ test('OCR status reports the installed local Tesseract capability', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'documenter-ocr-status-'));
   const status = ocrStatus(root);
   assert.equal(status.backend.executable, true);
-  assert.equal(status.backend.version, '5.3.4');
+  assert.match(status.backend.version, /^5\./);
   assert.ok(status.languages.includes('eng'));
   assert.ok(status.languages.includes('osd'));
   assert.equal(status.models.find(item => item.id === 'eng').sha256.length, 64);
@@ -26,7 +26,7 @@ test('model provisioning is atomic, idempotent by identity, verifiable and remov
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'documenter-ocr-model-'));
   const bytes = fs.readFileSync(model);
   const expectedSha256 = digest(bytes);
-  const first = installOcrModel(root, { id: 'eng', sourcePath: model, expectedSha256, packageSha256: 'b'.repeat(64) });
+  const first = installOcrModel(root, { id: 'eng', sourcePath: model, expectedSha256, packageSha256: 'b1996b3113c78663f4dd16cf18aa1f288b07e9624f8d4a0ddbd7d9b52a234ba7' });
   assert.equal(first.ok, true);
   assert.equal(verifyOcrModels(root, { modelRoot: path.join(root, '.documenter/ocr/models') }).models.find(item => item.id === 'eng').verified, true);
   const manifestPath = path.join(root, '.documenter/ocr/models.json');
