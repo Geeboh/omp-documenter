@@ -928,6 +928,17 @@ node scripts/optional-capabilities.mjs external external-output.json
 
 Search is lexical fallback with evidence links, not embedding proof. Merge is heading-identity three-way merge with explicit conflicts. External output requires `allowExternalOutput: true`, rejects traversal and overwrite, and reports per-file atomicity limits.
 
+## Native token usage
+
+Documenter has its own optional usage ledger. It does not require Tersio.
+
+```bash
+node scripts/documenter-usage.mjs sync --root "$PWD" --input host-usage.jsonl
+node scripts/documenter-usage.mjs stats --root "$PWD"
+```
+
+The sync accepts explicit JSONL usage records, normalizes provider fields into input, output, cache-read, cache-write, and cost buckets, skips unchanged files, deduplicates stable IDs, and stores local state under `.documenter/`. Missing host usage remains `unavailable`; text-length estimates are never presented as measured tokens.
+
 ## Canonical source: docs/VALIDATION.md
 
 # Validation and limits
