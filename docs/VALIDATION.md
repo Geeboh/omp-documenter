@@ -7,9 +7,9 @@
 - Runtime: Node.js v24.22.3 on Linux x64.
 - Runtime dependencies: Node built-ins; Git for Git-repository fixtures.
 - Automated suite: `npm test`.
-- Result: **70 tests passed; 0 failed.**
+- Result: **88 tests passed; 0 failed.**
 
-The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the full suite. OMP 19.2.1 read/write tool qualification is partial. The historical v1 result below is retained as baseline evidence, not current v2 proof.
+The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the full suite. Local Tesseract OCR passed real raster and image-only PDF qualification. OMP 19.2.1 read/write tool qualification is partial.
 
 ## What the automated tests establish
 
