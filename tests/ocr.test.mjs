@@ -6,8 +6,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { installOcrModel, ocrDoctor, ocrStatus, removeOcrModel, testOcr, verifyOcrModels } from '../lib/ocr.mjs';
 
-const scanPdf = '/tmp/documenter-ocr-scan.pdf';
-const fixture = '/tmp/documenter-ocr.png';
+const fixture = [path.resolve('.documenter/local-artifacts/documenter-ocr.png'), '/tmp/documenter-ocr.png'].find(file => fs.existsSync(file)) ?? path.resolve('.documenter/local-artifacts/documenter-ocr.png');
+const scanPdf = [path.resolve('.documenter/local-artifacts/documenter-ocr-scan.pdf'), '/tmp/documenter-ocr-scan.pdf'].find(file => fs.existsSync(file)) ?? path.resolve('.documenter/local-artifacts/documenter-ocr-scan.pdf');
 const model = '/usr/share/tesseract-ocr/5/tessdata/eng.traineddata';
 const digest = value => crypto.createHash('sha256').update(value).digest('hex');
 
