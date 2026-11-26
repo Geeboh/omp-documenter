@@ -8,7 +8,7 @@ Documentation must be clear, consistent and user friendly. Every factual explana
 
 ## Start here
 
-1. Install or unpack this package into a permanent directory outside the repository you want to document.
+1. Install or unpack this package into a permanent directory outside the repository you want to document. Run `npm install --omit=dev` in that directory to install the pinned native Xberg backend. If the backend is unavailable, Markdown and plain-text workflows still work.
 2. Link it to OMP:
 
    ```bash
