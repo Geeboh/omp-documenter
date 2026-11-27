@@ -49,10 +49,10 @@ git --version
 
 ### Install or upgrade from the release wrappers
 
-Download `omp-documenter-install.sh` and `omp-documenter-uninstall.sh` from the `v2.0.1` release. The install wrapper verifies the installer checksum, installs or upgrades an owned directory, performs a no-script dependency install, approves only the pinned Tree-sitter packages, rebuilds native bindings, and links OMP.
+Download `omp-documenter-install.sh` and `omp-documenter-uninstall.sh` from the `v2.0.2` release. The install wrapper verifies the installer checksum, installs or upgrades an owned directory, performs a no-script dependency install, approves only the pinned Tree-sitter packages, rebuilds native bindings, and links OMP.
 
 ```bash
-curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.1/omp-documenter-install.sh
+curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.2/omp-documenter-install.sh
 chmod +x omp-documenter-install.sh
 ./omp-documenter-install.sh
 ```
@@ -62,12 +62,12 @@ Run the same command to upgrade the default installation. Use `--fresh` only for
 Uninstall the package without touching project `.documenter` state:
 
 ```bash
-curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.1/omp-documenter-uninstall.sh
+curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.2/omp-documenter-uninstall.sh
 chmod +x omp-documenter-uninstall.sh
 ./omp-documenter-uninstall.sh
 ```
 
-For manual installation, use the self-contained `omp-documenter-2.0.1-install.mjs`, then run `npm install --omit=dev --ignore-scripts`, approve the four pinned Tree-sitter packages with `npm install-scripts approve`, run `npm rebuild`, and link with `omp plugin link`.
+For manual installation, use the self-contained `omp-documenter-2.0.2-install.mjs`, then run `npm install --omit=dev --ignore-scripts`, approve the four pinned Tree-sitter packages with `npm install-scripts approve`, run `npm rebuild`, and link with `omp plugin link`.
 
 Start a new OMP session from the repository root:
 

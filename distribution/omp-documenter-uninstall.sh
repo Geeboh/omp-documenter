@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION='2.0.1'
+VERSION='2.0.2'
 PACKAGE='omp-documenter'
 DEST="${HOME}/.local/share/omp-documenter-${VERSION}"
 
