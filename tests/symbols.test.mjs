@@ -29,7 +29,8 @@ test('JavaScript adapter reports declaration metadata without claiming exhaustiv
     'export function run() {}',
     'const _helper = value => value;'
   ].join('\n'));
-  assert.deepEqual(result.adapter, { id: 'javascript-family', version: 1 });
+  assert.equal(result.adapter.id, 'javascript-family');
+  assert.equal(result.adapter.parser, 'tree-sitter');
   assert.deepEqual(result.symbols.map(symbol => ({
     name: symbol.name,
     exported: symbol.exported,
@@ -90,7 +91,8 @@ test('Python adapter observes decorators, inheritance, private names and overloa
   const child = result.symbols.find(symbol => symbol.name === 'Child');
   const parse = result.symbols.filter(symbol => symbol.name === 'parse');
   const privateSymbol = result.symbols.find(symbol => symbol.name === '_private');
-  assert.deepEqual(result.adapter, { id: 'python', version: 1 });
+  assert.equal(result.adapter.id, 'python');
+  assert.equal(result.adapter.parser, 'tree-sitter');
   assert.deepEqual({ decorators: child.decorators, bases: child.bases, exported: child.exported }, { decorators: ['dataclass'], bases: ['Base'], exported: true });
   assert.deepEqual(parse.map(symbol => ({ decorators: symbol.decorators, overloadLike: symbol.overloadLike })), [
     { decorators: ['overload'], overloadLike: true },
