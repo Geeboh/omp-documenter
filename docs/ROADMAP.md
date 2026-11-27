@@ -19,6 +19,14 @@ The following increments are implemented in the current worktree. Each remains b
 | 7 | Optional CI integrity job | Complete | Run examples, renderer detection, host probing, tests and syntax checks in CI with evidence artifacts. | `.github/workflows/ci.yml` `integrity` job. |
 | 8 | Semantic search for very large repositories | Complete as measured lexical index | Reuse content-addressed lexical indexes and report invalidation; no unmeasured embeddings. | Indexed search tests cover digest reuse, add/change/remove invalidation and semantic-disabled results. |
 
+## Long-distance deferred scope
+
+Full documentation-site creation, theme selection and hosted renderer integration are deferred. Current projects primarily publish GitHub-rendered Markdown with images, local links and source references.
+
+Documenter will not force MkDocs, Docusaurus, Sphinx or another site generator into those projects. Renderer detection remains available for projects that already declare one.
+
+Reopen this scope only when a project supplies a site requirement, renderer configuration, build command, navigation policy and an authorized visual validation target.
+
 ## Keep these properties
 
 - Keep one discoverable command for each everyday workflow.

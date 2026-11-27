@@ -43,6 +43,7 @@ Tests establish these observed cases, not correctness for all possible repositor
 - `lib/optional-capabilities.mjs` provides explicit dependency/impact traversal, baseline-preserving Markdown section merge receipts, and content-addressed lexical indexing with add/change/remove invalidation.
 - `lib/verification.mjs` records bounded argv-example execution receipts and detects MkDocs, Docusaurus and Sphinx configuration. Renderer execution remains explicit and unclaimed until a project command runs.
 - `.github/workflows/ci.yml` includes an `integrity` job for example receipts, renderer detection, host probing, tests and syntax checks.
+- Current documentation target is GitHub-rendered Markdown with images and local links. Full site creation and hosted renderer execution are deferred to the long-distance roadmap.
 - Semantic search remains disabled without a measured semantic backend. Indexed lexical search is the supported deterministic fallback.
 
 ## Independent skill exercise

@@ -1011,6 +1011,7 @@ Tests establish these observed cases, not correctness for all possible repositor
 - `lib/optional-capabilities.mjs` provides explicit dependency/impact traversal, baseline-preserving Markdown section merge receipts, and content-addressed lexical indexing with add/change/remove invalidation.
 - `lib/verification.mjs` records bounded argv-example execution receipts and detects MkDocs, Docusaurus and Sphinx configuration. Renderer execution remains explicit and unclaimed until a project command runs.
 - `.github/workflows/ci.yml` includes an `integrity` job for example receipts, renderer detection, host probing, tests and syntax checks.
+- Current documentation target is GitHub-rendered Markdown with images and local links. Full site creation and hosted renderer execution are deferred to the long-distance roadmap.
 - Semantic search remains disabled without a measured semantic backend. Indexed lexical search is the supported deterministic fallback.
 
 ## Independent skill exercise
@@ -1094,6 +1095,14 @@ The following increments are implemented in the current worktree. Each remains b
 | 6 | Example-verification harness | Complete with limits | Execute explicit argv examples with bounded output, environment and revision receipts. | Verification tests and `.github/fixtures/documenter-examples.json`. |
 | 7 | Optional CI integrity job | Complete | Run examples, renderer detection, host probing, tests and syntax checks in CI with evidence artifacts. | `.github/workflows/ci.yml` `integrity` job. |
 | 8 | Semantic search for very large repositories | Complete as measured lexical index | Reuse content-addressed lexical indexes and report invalidation; no unmeasured embeddings. | Indexed search tests cover digest reuse, add/change/remove invalidation and semantic-disabled results. |
+
+## Long-distance deferred scope
+
+Full documentation-site creation, theme selection and hosted renderer integration are deferred. Current projects primarily publish GitHub-rendered Markdown with images, local links and source references.
+
+Documenter will not force MkDocs, Docusaurus, Sphinx or another site generator into those projects. Renderer detection remains available for projects that already declare one.
+
+Reopen this scope only when a project supplies a site requirement, renderer configuration, build command, navigation policy and an authorized visual validation target.
 
 ## Keep these properties
 
