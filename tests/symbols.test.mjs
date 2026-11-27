@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { buildSymbolGraph } from '../lib/symbol-graph.mjs';
 import { inventorySymbols } from '../lib/symbols.mjs';
 
 test('JavaScript symbol inventory reports bounded declarations and limits', () => {
@@ -162,4 +163,62 @@ test('Python class functions are methods with qualified owners', () => {
   assert.equal(run.qualifiedId, 'app.py::App.run');
   assert.equal(result.references[0].to, finish.id);
   assert.equal(result.references[0].resolved, true);
+});
+
+test('Symbol graph resolves local JavaScript and Python imports while preserving unknown edges', () => {
+  const graph = buildSymbolGraph([
+    {
+      path: 'src/api.js',
+      text: [
+        "import { helper } from './helper';",
+        "import { external } from 'external-package';",
+        'export function api(value) { return [helper(value), missing(value)]; }'
+      ].join('\n')
+    },
+    {
+      path: 'src/helper.js',
+      text: 'export function helper(value) { return value; }\n'
+    },
+    {
+      path: 'pkg/api.py',
+      text: [
+        'from .helper import helper',
+        'import requests',
+        'def api(value):',
+        '    return [helper(value), requests.get(value)]'
+      ].join('\n')
+    },
+    {
+      path: 'pkg/helper.py',
+      text: 'def helper(value):\n    return value\n'
+    }
+  ]);
+  assert.equal(graph.schemaVersion, 1);
+  assert.deepEqual(graph.files.map(file => file.path), ['pkg/api.py', 'pkg/helper.py', 'src/api.js', 'src/helper.js']);
+
+  const jsHelper = graph.symbols.find(symbol => symbol.qualifiedId === 'src/helper.js::helper');
+  const pyHelper = graph.symbols.find(symbol => symbol.qualifiedId === 'pkg/helper.py::helper');
+  const jsImport = graph.imports.find(record => record.path === 'src/api.js' && record.source === './helper');
+  const pyImport = graph.imports.find(record => record.path === 'pkg/api.py' && record.source === '.helper');
+  assert.deepEqual({
+    resolved: jsImport.resolved,
+    resolvedPath: jsImport.resolvedPath,
+    resolvedSymbols: jsImport.resolvedSymbols
+  }, { resolved: true, resolvedPath: 'src/helper.js', resolvedSymbols: [jsHelper.id] });
+  assert.deepEqual({
+    resolved: pyImport.resolved,
+    resolvedPath: pyImport.resolvedPath,
+    resolvedSymbols: [pyHelper.id]
+  }, { resolved: true, resolvedPath: 'pkg/helper.py', resolvedSymbols: [pyHelper.id] });
+
+  const jsCall = graph.references.find(reference => reference.path === 'src/api.js' && reference.from?.includes(':function:api'));
+  const pyCall = graph.references.find(reference => reference.path === 'pkg/api.py' && reference.from?.includes(':function:api'));
+  assert.equal(jsCall.to, jsHelper.id);
+  assert.equal(jsCall.resolved, true);
+  assert.equal(pyCall.to, pyHelper.id);
+  assert.equal(pyCall.resolved, true);
+  assert.equal(graph.imports.find(record => record.path === 'pkg/api.py' && record.source === 'requests').resolved, false);
+  assert.ok(graph.unresolved.some(entry => entry.path === 'pkg/api.py' && entry.kind === 'import' && entry.name === 'requests'));
+  assert.ok(graph.unresolved.some(entry => entry.path === 'pkg/api.py' && entry.kind === 'call' && entry.name === 'get'));
+  assert.ok(graph.unresolved.some(entry => entry.path === 'src/api.js' && entry.kind === 'call' && entry.name === 'missing'));
 });
