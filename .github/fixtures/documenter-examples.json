@@ -1,0 +1,16 @@
+{
+  "examples": [
+    {
+      "id": "documenter-help",
+      "argv": ["node", "scripts/documenter.mjs", "--help"],
+      "expectedExit": 0,
+      "stdoutIncludes": "Documenter"
+    },
+    {
+      "id": "documenter-host-help",
+      "argv": ["node", "scripts/omp-host-matrix.mjs", "--help"],
+      "expectedExit": 0,
+      "stdoutIncludes": "Usage"
+    }
+  ]
+}
