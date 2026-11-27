@@ -3,7 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { mergeMarkdownSections, publishExternalFiles, searchDocuments } from '../lib/optional-capabilities.mjs';
+import {
+  buildDependencyGraph,
+  buildLexicalIndex,
+  mergeMarkdownSections,
+  publishExternalFiles,
+  searchDocuments,
+  searchIndexedDocuments
+} from '../lib/optional-capabilities.mjs';
 
 test('three-way section merge preserves non-overlapping edits and reports conflicts', () => {
   const base = '# Guide\n\n## Setup\nBase setup.\n\n## Ops\nBase ops.\n';
@@ -15,11 +22,74 @@ test('three-way section merge preserves non-overlapping edits and reports confli
   assert.match(result.merged, /Generated ops/);
 });
 
-test('lexical search returns bounded evidence-linked results', () => {
-  const result = searchDocuments([{ path: 'docs/api.md', text: 'Configure the API endpoint.' }, { path: 'docs/ops.md', text: 'Restart the worker.' }], 'API endpoint');
-  assert.equal(result.kind, 'lexical-search');
+test('section merge reports insertions, moves, conflicts and interruption without overwriting current text', () => {
+  const base = '# Guide\n\n## Setup {#setup}\nBase setup.\n\n## Ops {#ops}\nBase ops.\n';
+  const inserted = mergeMarkdownSections(base, base, '# Guide\n\n## Ops {#ops}\nBase ops.\n\n## Setup {#setup}\nBase setup.\n\n## New {#new}\nGenerated.\n');
+  assert.deepEqual(inserted.insertions.map(entry => entry.section), ['id:new']);
+  assert.ok(inserted.moves.some(move => move.section === 'id:setup'));
+  assert.match(inserted.merged, /## New/);
+
+  const conflict = mergeMarkdownSections(base, '# Guide\n\n## Setup {#setup}\nHuman setup.\n\n## Ops {#ops}\nBase ops.\n', '# Guide\n\n## Setup {#setup}\nGenerated setup.\n\n## Ops {#ops}\nBase ops.\n');
+  assert.equal(conflict.clean, false);
+  assert.equal(conflict.conflicts[0].reason, 'content');
+  assert.match(conflict.merged, /Human setup/);
+
+  const interrupted = mergeMarkdownSections(base, '# Guide\n\n## Setup {#setup}\nHuman setup.\n', '# Guide\n\n## Setup {#setup}\nGenerated setup.\n', { interrupted: true });
+  assert.equal(interrupted.interrupted, true);
+  assert.equal(interrupted.merged, '# Guide\n\n## Setup {#setup}\nHuman setup.\n');
+});
+
+test('dependency and impact graph traverses explicit interfaces and falls back for dynamic records', () => {
+  const graph = buildDependencyGraph({
+    files: [
+      { path: 'src/a.js', dependencies: ['src/b.js'] },
+      { path: 'src/b.js', dependencies: [] },
+      { path: 'src/c.js', dependencies: [] }
+    ],
+    interfaces: [{ id: 'api', path: 'src/b.js', consumers: ['src/a.js'], complete: true }],
+    changes: [{ path: 'src/b.js', status: 'changed' }]
+  });
+  assert.equal(graph.complete, true);
+  assert.deepEqual(graph.impacted, ['interface:api', 'src/a.js', 'src/b.js']);
+  assert.deepEqual(graph.unaffected, ['src/c.js']);
+
+  const conservative = buildDependencyGraph({
+    files: [
+      { path: 'src/a.js', dependencies: ['src/b.js'], dynamic: true },
+      { path: 'src/b.js', dependencies: [] }
+    ],
+    changes: [{ path: 'src/b.js', status: 'changed' }]
+  });
+  assert.equal(conservative.complete, false);
+  assert.equal(conservative.fallback.mode, 'all-files');
+  assert.deepEqual(conservative.unaffected, []);
+  const config = buildDependencyGraph({
+    files: [{ path: 'config.json', dependencies: [], config: true }],
+    changes: [{ path: 'config.json', status: 'changed' }]
+  });
+  assert.ok(config.unknowns.some(unknown => unknown.code === 'configuration-dependency' || unknown.code === 'config-change'));
+});
+
+test('indexed lexical search is deterministic, content-addressed and semantic-disabled', () => {
+  const documents = [
+    { path: 'docs/api.md', text: 'Configure the API endpoint.' },
+    { path: 'docs/ops.md', text: 'Restart the worker.' }
+  ];
+  const index = buildLexicalIndex(documents);
+  assert.equal(buildLexicalIndex([...documents].reverse()).corpusDigest, index.corpusDigest);
+  const result = searchIndexedDocuments(index, 'API endpoint');
   assert.equal(result.results[0].path, 'docs/api.md');
+  assert.equal(result.corpusDigest, index.corpusDigest);
+  assert.equal(result.semantic.enabled, false);
   assert.match(result.fallback, /not embedding/);
+
+  const changed = buildLexicalIndex([{ ...documents[0], text: 'Configure the API route.' }, documents[1]], { previousIndex: index });
+  assert.notEqual(changed.corpusDigest, index.corpusDigest);
+  assert.deepEqual(changed.invalidation.changed, ['docs/api.md']);
+  assert.deepEqual(changed.invalidation.unchanged, ['docs/ops.md']);
+  const reused = searchDocuments([{ ...documents[0], text: 'Configure the API route.' }, documents[1]], 'API', { index });
+  assert.equal(reused.indexed, true);
+  assert.throws(() => searchDocuments(documents, 'API', { semantic: true }), /Semantic search is disabled/);
 });
 
 test('external output requires explicit authority and refuses overwrite', t => {
