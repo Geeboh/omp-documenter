@@ -78,6 +78,8 @@ External output, semantic search, automatic section merging and proprietary prov
 Local OCR uses the installed Xberg Tesseract backend. `ocr status`, `ocr doctor`, `ocr models list`, `ocr models verify` and `ocr test` expose readiness and receipts. Model downloads are not automatic.
 If another OMP plugin fails during automatic discovery, use `node scripts/omp-documenter-host.mjs` to load Documenter with automatic extensions disabled. This does not uninstall or modify other plugins.
 
+The roadmap adapters are available as deterministic local tooling. Use `node scripts/optional-capabilities.mjs graph|merge|index|search-indexed`, `node scripts/renderer-check.mjs`, `node scripts/verify-examples.mjs`, and `node scripts/omp-host-matrix.mjs` with explicit JSON inputs or paths. Indexed lexical search reports corpus invalidation; semantic search remains disabled without a measured backend. Renderer detection does not claim a renderer build until the project's command is explicitly run.
+
 ## What a passing check means
 
 A passing mechanical check means the implemented integrity conditions passed. It does **not** establish that an agent interpreted every function correctly, that every language symbol was discovered, that an example was executed, or that the project is secure. Those distinctions must remain visible in the generated documentation.

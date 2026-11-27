@@ -5,9 +5,9 @@
 - Package version: 2.0.0.
 - Candidate working revision: see the workspace-only `.overhaul/documenter-v2/work/RELEASE-EVIDENCE.md`; release artifacts are generated separately and `.overhaul` is not shipped.
 - Runtime: Node.js v24.22.3 on Linux x64.
-- Runtime dependencies: Node built-ins; Git for Git-repository fixtures.
+- Runtime dependencies: Node built-ins; Git for Git-repository fixtures; repository-local Android Open Source Project Xberg fixtures under `tests/fixtures/xberg/`.
 - Automated suite: `npm test`.
-- Result: **88 tests passed; 0 failed.**
+- Result: **96 tests passed; 0 failed; 0 skipped.**
 
 The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the full suite. Local Tesseract OCR passed real raster and image-only PDF qualification. OMP 19.2.1 read/write tool qualification is partial.
 
@@ -35,6 +35,15 @@ The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1
 | Distribution | The installer reproduces every packaged file byte-for-byte, refuses existing destinations and refuses symlinked destination parents. |
 
 Tests establish these observed cases, not correctness for all possible repositories or concurrent filesystem behavior.
+
+## Roadmap adapter qualification
+
+- `scripts/omp-host-matrix.mjs` passed against the installed `omp/19.2.1` executable. It records version and isolated extension-load results without shell interpretation. Missing hosts remain `unavailable` unless `--require-host` is supplied.
+- `lib/symbols.mjs` provides bounded JavaScript/TypeScript and Python declaration metadata for visibility, decorators, inheritance and overload-like declarations. It remains non-exhaustive.
+- `lib/optional-capabilities.mjs` provides explicit dependency/impact traversal, baseline-preserving Markdown section merge receipts, and content-addressed lexical indexing with add/change/remove invalidation.
+- `lib/verification.mjs` records bounded argv-example execution receipts and detects MkDocs, Docusaurus and Sphinx configuration. Renderer execution remains explicit and unclaimed until a project command runs.
+- `.github/workflows/ci.yml` includes an `integrity` job for example receipts, renderer detection, host probing, tests and syntax checks.
+- Semantic search remains disabled without a measured semantic backend. Indexed lexical search is the supported deterministic fallback.
 
 ## Independent skill exercise
 
