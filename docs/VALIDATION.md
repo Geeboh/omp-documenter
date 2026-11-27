@@ -56,13 +56,17 @@ This is a synthetic smoke baseline, not a capacity or semantic-quality claim. Ev
 
 ## Real GitHub lexical ranking comparison
 
-The offline evaluator ran against `psf/requests` commit `3c7baaa05ab4aa49cc819ce3a819d260de19c157`. The corpus contained 79 text documents and a 1,333,859-byte serialized index. Twenty hand-labeled queries ran five times per ranking mode at top 5.
+The offline evaluator ran against three pinned GitHub repositories: `psf/requests`, `fastapi/fastapi` and `sindresorhus/p-map`. The corpus contained 3,092 text documents and 50 hand-labeled queries. Each ranking mode ran five repetitions at top 5 with no network, embeddings or external models.
 
-The existing overlap ranker reached 0.800 top-5 recall and 0.7392 mean reciprocal rank. The opt-in `weighted-v1` ranker reached the same 0.800 recall and improved mean reciprocal rank to 0.7583, a 2.59% relative improvement. Median average latency increased from 0.045 ms to 3.399 ms. Median p95 latency increased from 0.071 ms to 5.039 ms.
+The overlap ranker reached 0.640 top-5 recall and 0.5377 mean reciprocal rank. Optimized `weighted-v1` reached 0.700 recall and 0.7133 mean reciprocal rank. This is a +0.060 recall gain and +0.1757 MRR gain, or +32.67% relative MRR.
 
-Overlap remains the default ranking. `weighted-v1` is a candidate-only mode. Optimize it only when a representative query set shows sufficient ranking gain to justify its latency and index-cost tradeoff.
+Median aggregate average latency was 0.268 ms for overlap and 10.825 ms for weighted-v1. Median aggregate p95 latency was 0.657 ms and 21.108 ms. Candidate scoring now uses query-token postings and avoids per-document field Set allocation, but weighted-v1 remains much slower.
 
-The weighted ranker improved first-relevant placement, not recall. Evaluation used no network, embeddings or external models. Evidence is in `.overhaul/documenter-v2/work/REAL-REPO-LEXICAL-EVIDENCE.json`.
+Overlap remains the default ranking. Weighted-v1 stays opt-in because ranking gains justify retaining a candidate, not changing the default. Evidence is in `.overhaul/documenter-v2/work/REAL-REPO-LEXICAL-EVIDENCE.json`.
+
+## Normal OMP profile qualification
+
+Normal OMP `19.2.1` status, check and initial dry-run dispatch completed without an error result. Busy scheduling, approval prompts, worker execution and worker fallback remain unqualified. No unrelated OMP plugins were modified. Evidence is `.overhaul/documenter-v2/work/NORMAL-OMP-QUALIFICATION.json`.
 
 ## Independent skill exercise
 

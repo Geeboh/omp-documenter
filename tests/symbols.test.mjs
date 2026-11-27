@@ -102,3 +102,64 @@ test('Python adapter observes decorators, inheritance, private names and overloa
   assert.equal(result.coverage.inherited, 1);
   assert.equal(result.coverage.overloadLike, 2);
 });
+
+test('Tree-sitter symbols expose qualified IDs and method owners', () => {
+  const result = inventorySymbols('src/worker.js', [
+    'function helper(value) { return value; }',
+    'class Worker {',
+    '  method(value) { return helper(value); }',
+    '}'
+  ].join('\n'));
+  const worker = result.symbols.find(symbol => symbol.name === 'Worker');
+  const method = result.symbols.find(symbol => symbol.name === 'method');
+  const helper = result.symbols.find(symbol => symbol.name === 'helper');
+  assert.equal(worker.qualifiedId, 'src/worker.js::Worker');
+  assert.equal(worker.id, 'src/worker.js:class:Worker');
+  assert.equal(helper.qualifiedId, 'src/worker.js::helper');
+  assert.equal(helper.id, 'src/worker.js:function:helper');
+  assert.equal(method.kind, 'method');
+  assert.equal(method.owner, worker.id);
+  assert.equal(method.qualifiedId, 'src/worker.js::Worker.method');
+});
+
+test('Tree-sitter imports and bounded call references preserve unresolved calls', () => {
+  const result = inventorySymbols('src/run.js', [
+    "import defaultValue, { external as ext } from './dep.js';",
+    'function helper(value) { return value; }',
+    'export function run(value) { return [helper(value), ext(value)]; }'
+  ].join('\n'));
+  const run = result.symbols.find(symbol => symbol.name === 'run');
+  const helper = result.symbols.find(symbol => symbol.name === 'helper');
+  assert.deepEqual(result.imports, [
+    { source: './dep.js', target: 'default', alias: 'defaultValue', kind: 'default', resolved: false },
+    { source: './dep.js', target: 'external', alias: 'ext', kind: 'named', resolved: false }
+  ]);
+  assert.deepEqual(result.references, [
+    { from: run.id, to: helper.id, kind: 'call', resolved: true },
+    { from: run.id, to: 'ext', kind: 'call', resolved: false }
+  ]);
+  assert.deepEqual(result.unresolved, [{
+    kind: 'call',
+    name: 'ext',
+    reason: 'Imported calls are foreign until a module resolver is available.'
+  }]);
+  assert.ok(result.limitations.some(limitation => limitation.includes('complete call graphs')));
+});
+
+test('Python class functions are methods with qualified owners', () => {
+  const result = inventorySymbols('app.py', [
+    'class App:',
+    '    def run(self):',
+    '        return self.finish()',
+    '    def finish(self):',
+    '        return 1'
+  ].join('\n'));
+  const app = result.symbols.find(symbol => symbol.name === 'App');
+  const run = result.symbols.find(symbol => symbol.name === 'run');
+  const finish = result.symbols.find(symbol => symbol.name === 'finish');
+  assert.equal(run.kind, 'method');
+  assert.equal(run.owner, app.id);
+  assert.equal(run.qualifiedId, 'app.py::App.run');
+  assert.equal(result.references[0].to, finish.id);
+  assert.equal(result.references[0].resolved, true);
+});

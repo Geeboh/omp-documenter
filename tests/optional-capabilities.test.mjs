@@ -125,6 +125,23 @@ test('weighted-v1 exposes field components and ranks path and heading matches', 
   assert.equal(first.score, 14);
   assert.ok(first.score > second.score);
   assert.deepEqual(searchDocuments(documents, 'API endpoint', { ranking: 'weighted-v1' }).results, result.results);
+  assert.deepEqual(searchIndexedDocuments(index, 'API endpoint', { ranking: 'weighted-v1' }).results, result.results);
+  assert.deepEqual(searchDocuments([...documents].reverse(), 'API endpoint', { ranking: 'weighted-v1' }).results, result.results);
+});
+
+test('weighted-v1 falls back to all indexed documents when query postings are empty', () => {
+  const documents = [
+    { path: 'docs/a.md', text: 'Alpha.' },
+    { path: 'docs/b.md', text: 'Beta.' }
+  ];
+  const index = buildLexicalIndex(documents);
+  const weighted = searchIndexedDocuments(index, 'unindexed-token', { ranking: 'weighted-v1' });
+  const expectedComponents = { pathMatch: 0, headingMatch: 0, textMatch: 0, phraseMatch: 0, rarity: 0 };
+
+  assert.deepEqual(weighted.results.map(result => result.path), ['docs/a.md', 'docs/b.md']);
+  assert.deepEqual(weighted.results.map(result => result.score), [0, 0]);
+  assert.deepEqual(weighted.results.map(result => result.scoreComponents), [expectedComponents, expectedComponents]);
+  assert.deepEqual(searchIndexedDocuments(index, 'unindexed-token').results, []);
 });
 
 test('lexical index treats prototype property names as ordinary tokens', () => {

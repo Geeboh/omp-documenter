@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {"id":"requests","repo":".runtime/real-repos/requests","queries":"tests/fixtures/semantic-search-real/requests-queries.json"},
+    {"id":"fastapi","repo":".runtime/real-repos/fastapi","queries":"tests/fixtures/semantic-search-real/fastapi-queries.json"},
+    {"id":"p-map","repo":".runtime/real-repos/p-map","queries":"tests/fixtures/semantic-search-real/p-map-queries.json"}
+  ]
+}

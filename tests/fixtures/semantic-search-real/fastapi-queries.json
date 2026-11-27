@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "repository": {"name": "fastapi/fastapi", "url": "https://github.com/fastapi/fastapi", "commit": "05e6df7e906c3decba377c37548019973f40bf15"},
+  "languages": ["Python", "Markdown"],
+  "queries": [
+    {"id":"first-steps","text":"FastAPI first application path operation", "expectedPaths":["docs/en/docs/tutorial/first-steps.md","fastapi/applications.py"]},
+    {"id":"path-parameters","text":"path parameters validation route", "expectedPaths":["docs/en/docs/tutorial/path-params.md","fastapi/routing.py"]},
+    {"id":"query-parameters","text":"query parameters defaults validation", "expectedPaths":["docs/en/docs/tutorial/query-params.md","fastapi/routing.py"]},
+    {"id":"request-body","text":"request body Pydantic model JSON", "expectedPaths":["docs/en/docs/tutorial/body.md","fastapi/routing.py"]},
+    {"id":"response-model","text":"response model filtering serialization", "expectedPaths":["docs/en/docs/tutorial/response-model.md","fastapi/routing.py"]},
+    {"id":"dependencies","text":"dependency injection reusable dependencies", "expectedPaths":["docs/en/docs/tutorial/dependencies/index.md","fastapi/dependencies/utils.py"]},
+    {"id":"oauth2-jwt","text":"OAuth2 JWT bearer security token", "expectedPaths":["docs/en/docs/tutorial/security/oauth2-jwt.md","fastapi/security/oauth2.py"]},
+    {"id":"cors","text":"CORS middleware origins headers", "expectedPaths":["docs/en/docs/tutorial/cors.md","fastapi/middleware/cors.py"]},
+    {"id":"background-tasks","text":"background tasks after response", "expectedPaths":["docs/en/docs/tutorial/background-tasks.md","fastapi/background.py"]},
+    {"id":"websockets","text":"WebSocket connection messages", "expectedPaths":["docs/en/docs/advanced/websockets.md","fastapi/websockets.py"]},
+    {"id":"openapi","text":"customize OpenAPI schema", "expectedPaths":["docs/en/docs/how-to/extending-openapi.md","fastapi/openapi/utils.py"]},
+    {"id":"testing","text":"TestClient pytest testing application", "expectedPaths":["docs/en/docs/tutorial/testing.md","fastapi/testclient.py"]},
+    {"id":"custom-response","text":"custom response JSON HTML streaming", "expectedPaths":["docs/en/docs/advanced/custom-response.md","fastapi/responses.py"]},
+    {"id":"cli","text":"FastAPI command line interface run", "expectedPaths":["docs/en/docs/fastapi-cli.md","fastapi/cli.py"]},
+    {"id":"file-uploads","text":"upload files multipart form data", "expectedPaths":["docs/en/docs/tutorial/request-files.md","fastapi/dependencies/utils.py"]},
+    {"id":"static-files","text":"mount serve static files", "expectedPaths":["docs/en/docs/tutorial/static-files.md","fastapi/staticfiles.py"]},
+    {"id":"errors","text":"HTTP exception handlers validation errors", "expectedPaths":["docs/en/docs/tutorial/handling-errors.md","fastapi/exception_handlers.py"]},
+    {"id":"server-events","text":"server sent events streaming response", "expectedPaths":["docs/en/docs/tutorial/server-sent-events.md","fastapi/responses.py"]},
+    {"id":"middleware","text":"middleware request response processing", "expectedPaths":["docs/en/docs/tutorial/middleware.md","fastapi/applications.py"]},
+    {"id":"settings","text":"environment settings configuration", "expectedPaths":["docs/en/docs/advanced/settings.md","fastapi/applications.py"]}
+  ],
+  "evaluation": {"topK": 5, "repetitions": 5, "rankingModes": ["overlap", "weighted-v1"]}
+}

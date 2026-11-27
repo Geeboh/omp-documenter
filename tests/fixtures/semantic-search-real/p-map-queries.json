@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "repository": {"name": "sindresorhus/p-map", "url": "https://github.com/sindresorhus/p-map", "commit": "d61b6a33cc1d5533ad5711b435959f3f78c3d2fe"},
+  "languages": ["JavaScript", "TypeScript", "Markdown"],
+  "queries": [
+    {"id":"concurrency","text":"concurrency limit mapper promises", "expectedPaths":["readme.md","index.js"]},
+    {"id":"stop-on-error","text":"stop on error promise rejection", "expectedPaths":["readme.md","index.js"]},
+    {"id":"async-iterable","text":"async iterable mapping", "expectedPaths":["readme.md","index.js"]},
+    {"id":"abort-signal","text":"AbortSignal cancel pending promises", "expectedPaths":["readme.md","index.js"]},
+    {"id":"backpressure","text":"backpressure concurrency iterable", "expectedPaths":["readme.md","index.js"]},
+    {"id":"pmap-iterable","text":"pMapIterable concurrency", "expectedPaths":["readme.md","index.js"]},
+    {"id":"typescript-types","text":"TypeScript definitions options", "expectedPaths":["index.d.ts","readme.md"]},
+    {"id":"error-aggregation","text":"aggregate errors rejected promises", "expectedPaths":["readme.md","test.js"]},
+    {"id":"skip-function","text":"skip items filter mapper", "expectedPaths":["readme.md","index.js"]},
+    {"id":"performance","text":"performance benchmark p-map", "expectedPaths":["readme.md","test-multiple-pmapskips-performance.js"]}
+  ],
+  "evaluation": {"topK": 5, "repetitions": 5, "rankingModes": ["overlap", "weighted-v1"]}
+}
