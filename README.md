@@ -41,7 +41,7 @@ The directory passed to `plugin link` must remain available. For a single sessio
 Download the release wrappers. The install wrapper verifies the installer checksum, installs or upgrades an owned directory, approves only the four pinned Tree-sitter native scripts, rebuilds them, and links the package.
 
 ```bash
-curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.1/omp-documenter-install.sh
+curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.2/omp-documenter-install.sh
 chmod +x omp-documenter-install.sh
 ./omp-documenter-install.sh
 ```
@@ -51,7 +51,7 @@ Upgrade the existing default installation with the same command. Use `--fresh` o
 Uninstall without touching project `.documenter` state:
 
 ```bash
-curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.1/omp-documenter-uninstall.sh
+curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.2/omp-documenter-uninstall.sh
 chmod +x omp-documenter-uninstall.sh
 ./omp-documenter-uninstall.sh
 ```

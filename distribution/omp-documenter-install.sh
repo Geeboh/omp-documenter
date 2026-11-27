@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION='2.0.1'
+VERSION='2.0.2'
 PACKAGE='omp-documenter'
 BASE_URL="${DOCUMENTER_RELEASE_BASE_URL:-https://github.com/Geeboh/omp-documenter/releases/download/v${VERSION}}"
 DEFAULT_DIR="${HOME}/.local/share/omp-documenter-${VERSION}"
-LEGACY_DIR="${HOME}/.local/share/omp-documenter-2.0.0"
+LEGACY_DIR="${HOME}/.local/share/omp-documenter-2.0.1"
 DEST="$DEFAULT_DIR"
 FRESH=0
 
@@ -63,7 +63,7 @@ if [[ -e "$DEST" ]] && ! owned_destination "$DEST"; then
 fi
 LEGACY_SOURCE=''
 if [[ "$DEST" == "$DEFAULT_DIR" && ! -e "$DEST" && -e "$LEGACY_DIR" ]]; then
-  owned_version "$LEGACY_DIR" '2.0.0' || { echo "Refusing unmanaged legacy installation: $LEGACY_DIR" >&2; exit 1; }
+  owned_version "$LEGACY_DIR" '2.0.1' || { echo "Refusing unmanaged legacy installation: $LEGACY_DIR" >&2; exit 1; }
   LEGACY_SOURCE="$LEGACY_DIR"
 fi
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.2 — 28 November 2026
+
+- Fixed upgrade migration from the owned 2.0.1 installation directory.
+- Kept package replacement outside the current working directory during staged swaps.
+
 ## 2.0.1 — 28 November 2026
 
 - Added upgrade-safe install and uninstall wrappers.
