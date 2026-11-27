@@ -4,7 +4,7 @@
 
 OMP Documenter is an Oh My Pi extension package with an agent skill and a deterministic integrity engine. The agent investigates the repository and writes the explanation. The engine inventories files, checks evidence locations and hashes, tracks coverage, and protects existing documentation when pages are published.
 
-Documentation must be clear, consistent and user friendly. Every factual explanation must have sufficient evidence. Unknown facts remain visible, with their impact and a practical way to resolve them.
+Unknown facts remain visible, with their impact and a practical way to resolve them. This repository has also documented itself with OMP Documenter.
 
 ## Start here
 
