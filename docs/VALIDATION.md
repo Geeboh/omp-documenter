@@ -39,7 +39,7 @@ Tests establish these observed cases, not correctness for all possible repositor
 ## Roadmap adapter qualification
 
 - `scripts/omp-host-matrix.mjs` passed against the installed `omp/19.2.1` executable. It records version and isolated extension-load results without shell interpretation. Missing hosts remain `unavailable` unless `--require-host` is supplied.
-- `lib/symbols.mjs` provides bounded JavaScript/TypeScript and Python declaration metadata for visibility, decorators, inheritance and overload-like declarations. It remains non-exhaustive.
+- `lib/symbols.mjs` now uses Tree-sitter `0.21.1` with JavaScript `0.23.1`, Python `0.23.3` and TypeScript `0.23.2` grammars when available, with lexical fallback and explicit non-exhaustive semantic limits.
 - `lib/optional-capabilities.mjs` provides explicit dependency/impact traversal, baseline-preserving Markdown section merge receipts, and content-addressed lexical indexing with add/change/remove invalidation.
 - `lib/verification.mjs` records bounded argv-example execution receipts and detects MkDocs, Docusaurus and Sphinx configuration. Renderer execution remains explicit and unclaimed until a project command runs.
 - `.github/workflows/ci.yml` includes an `integrity` job for example receipts, renderer detection, host probing, tests and syntax checks.
