@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
 import http from 'node:http';
 import { acquireAuthenticatedSource, extractAuthenticatedSource, extractXbergBatch, extractXbergFile, probeXberg } from '../lib/xberg-adapter.mjs';
 import { runOperation } from '../lib/engine.mjs';
 
-const pdf = '/code/GT-N7105T/android-work/src/cts/tests/pdf/module/res/raw/sample_test.pdf';
-const docx = '/code/GT-N7105T/android-work/src/developers/build/prebuilts/gradle/StorageProvider/Application/src/main/res/raw/example.docx';
+const pdf = path.resolve('tests/fixtures/xberg/sample_test.pdf');
+const docx = path.resolve('tests/fixtures/xberg/example.docx');
 
 test('Xberg probe reports pinned backend capabilities', () => {
   const result = probeXberg();

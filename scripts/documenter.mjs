@@ -47,8 +47,8 @@ Options:
   --file PATH, --fixture PATH, --expected-phrase TEXT, --model-root PATH
   --model-id ID, --source-path PATH, --language CODE, --backend ID
 
-The deterministic engine does not generate prose. External output, semantic search
-and automatic section merging remain unsupported core capabilities.
+The deterministic engine does not generate prose. External output remains guarded.
+Optional graph, merge, indexed lexical search, renderer and example adapters are available through their documented scripts; semantic search remains disabled without measured capability.
 Exit 0 means success, 2 means conflict or unsatisfied check, and 1 means invalid input or execution error.
 `;
 

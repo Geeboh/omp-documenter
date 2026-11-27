@@ -3,7 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { mergeMarkdownSections, publishExternalFiles, searchDocuments } from '../lib/optional-capabilities.mjs';
+import {
+  buildDependencyGraph,
+  buildLexicalIndex,
+  mergeMarkdownSections,
+  publishExternalFiles,
+  searchDocuments,
+  searchIndexedDocuments
+} from '../lib/optional-capabilities.mjs';
 
 test('three-way section merge preserves non-overlapping edits and reports conflicts', () => {
   const base = '# Guide\n\n## Setup\nBase setup.\n\n## Ops\nBase ops.\n';
@@ -15,11 +22,131 @@ test('three-way section merge preserves non-overlapping edits and reports confli
   assert.match(result.merged, /Generated ops/);
 });
 
-test('lexical search returns bounded evidence-linked results', () => {
-  const result = searchDocuments([{ path: 'docs/api.md', text: 'Configure the API endpoint.' }, { path: 'docs/ops.md', text: 'Restart the worker.' }], 'API endpoint');
-  assert.equal(result.kind, 'lexical-search');
+test('section merge reports insertions, moves, conflicts and interruption without overwriting current text', () => {
+  const base = '# Guide\n\n## Setup {#setup}\nBase setup.\n\n## Ops {#ops}\nBase ops.\n';
+  const inserted = mergeMarkdownSections(base, base, '# Guide\n\n## Ops {#ops}\nBase ops.\n\n## Setup {#setup}\nBase setup.\n\n## New {#new}\nGenerated.\n');
+  assert.deepEqual(inserted.insertions.map(entry => entry.section), ['id:new']);
+  assert.ok(inserted.moves.some(move => move.section === 'id:setup'));
+  assert.match(inserted.merged, /## New/);
+
+  const conflict = mergeMarkdownSections(base, '# Guide\n\n## Setup {#setup}\nHuman setup.\n\n## Ops {#ops}\nBase ops.\n', '# Guide\n\n## Setup {#setup}\nGenerated setup.\n\n## Ops {#ops}\nBase ops.\n');
+  assert.equal(conflict.clean, false);
+  assert.equal(conflict.conflicts[0].reason, 'content');
+  assert.match(conflict.merged, /Human setup/);
+
+  const interrupted = mergeMarkdownSections(base, '# Guide\n\n## Setup {#setup}\nHuman setup.\n', '# Guide\n\n## Setup {#setup}\nGenerated setup.\n', { interrupted: true });
+  assert.equal(interrupted.interrupted, true);
+  assert.equal(interrupted.merged, '# Guide\n\n## Setup {#setup}\nHuman setup.\n');
+});
+
+test('dependency and impact graph traverses explicit interfaces and falls back for dynamic records', () => {
+  const graph = buildDependencyGraph({
+    files: [
+      { path: 'src/a.js', dependencies: ['src/b.js'] },
+      { path: 'src/b.js', dependencies: [] },
+      { path: 'src/c.js', dependencies: [] }
+    ],
+    interfaces: [{ id: 'api', path: 'src/b.js', consumers: ['src/a.js'], complete: true }],
+    changes: [{ path: 'src/b.js', status: 'changed' }]
+  });
+  assert.equal(graph.complete, true);
+  assert.deepEqual(graph.impacted, ['interface:api', 'src/a.js', 'src/b.js']);
+  assert.deepEqual(graph.unaffected, ['src/c.js']);
+
+  const conservative = buildDependencyGraph({
+    files: [
+      { path: 'src/a.js', dependencies: ['src/b.js'], dynamic: true },
+      { path: 'src/b.js', dependencies: [] }
+    ],
+    changes: [{ path: 'src/b.js', status: 'changed' }]
+  });
+  assert.equal(conservative.complete, false);
+  assert.equal(conservative.fallback.mode, 'all-files');
+  assert.deepEqual(conservative.unaffected, []);
+  const config = buildDependencyGraph({
+    files: [{ path: 'config.json', dependencies: [], config: true }],
+    changes: [{ path: 'config.json', status: 'changed' }]
+  });
+  assert.ok(config.unknowns.some(unknown => unknown.code === 'configuration-dependency' || unknown.code === 'config-change'));
+});
+
+test('indexed lexical search is deterministic, content-addressed and semantic-disabled', () => {
+  const documents = [
+    { path: 'docs/api.md', text: 'Configure the API endpoint.' },
+    { path: 'docs/ops.md', text: 'Restart the worker.' }
+  ];
+  const index = buildLexicalIndex(documents);
+  assert.equal(buildLexicalIndex([...documents].reverse()).corpusDigest, index.corpusDigest);
+  const result = searchIndexedDocuments(index, 'API endpoint');
   assert.equal(result.results[0].path, 'docs/api.md');
+  assert.equal(result.corpusDigest, index.corpusDigest);
+  assert.equal(result.semantic.enabled, false);
   assert.match(result.fallback, /not embedding/);
+
+  const changed = buildLexicalIndex([{ ...documents[0], text: 'Configure the API route.' }, documents[1]], { previousIndex: index });
+  assert.notEqual(changed.corpusDigest, index.corpusDigest);
+  assert.deepEqual(changed.invalidation.changed, ['docs/api.md']);
+  assert.deepEqual(changed.invalidation.unchanged, ['docs/ops.md']);
+  const reused = searchDocuments([{ ...documents[0], text: 'Configure the API route.' }, documents[1]], 'API', { index });
+  assert.equal(reused.indexed, true);
+  assert.throws(() => searchDocuments(documents, 'API', { semantic: true }), /Semantic search is disabled/);
+});
+
+test('overlap ranking remains the default and explicit compatibility mode', () => {
+  const documents = [
+    { path: 'docs/api.md', text: 'Configure the API endpoint.' },
+    { path: 'docs/ops.md', text: 'Restart the worker.' }
+  ];
+  const index = buildLexicalIndex(documents);
+  const implicit = searchIndexedDocuments(index, 'API endpoint');
+  const explicit = searchIndexedDocuments(index, 'API endpoint', { ranking: 'overlap' });
+  assert.deepEqual(implicit.results, explicit.results);
+  assert.equal(implicit.results[0].score, 2);
+  assert.equal(implicit.results[0].scoreComponents, undefined);
+});
+
+test('weighted-v1 exposes field components and ranks path and heading matches', () => {
+  const documents = [
+    { path: 'reference/api.md', text: '# API endpoint\nConfigure endpoint.' },
+    { path: 'notes/general.md', text: 'API endpoint is discussed.' }
+  ];
+  const index = buildLexicalIndex(documents);
+  const indexedDocument = index.documents.find(document => document.path === 'reference/api.md');
+  assert.deepEqual(indexedDocument.pathTokens, ['reference', 'api', 'md']);
+  assert.deepEqual(indexedDocument.headingTokens, ['api', 'endpoint']);
+  assert.deepEqual(indexedDocument.textTokens, ['configure', 'endpoint']);
+  assert.equal(indexedDocument.textPresent, true);
+
+  const result = searchIndexedDocuments(index, 'API endpoint', { ranking: 'weighted-v1' });
+  const [first, second] = result.results;
+  assert.equal(result.ranking, 'weighted-v1');
+  assert.equal(first.ranking, 'weighted-v1');
+  assert.deepEqual(first.scoreComponents, { pathMatch: 3, headingMatch: 4, textMatch: 1, phraseMatch: 4, rarity: 2 });
+  assert.equal(first.score, 14);
+  assert.ok(first.score > second.score);
+  assert.deepEqual(searchDocuments(documents, 'API endpoint', { ranking: 'weighted-v1' }).results, result.results);
+  assert.deepEqual(searchIndexedDocuments(index, 'API endpoint', { ranking: 'weighted-v1' }).results, result.results);
+  assert.deepEqual(searchDocuments([...documents].reverse(), 'API endpoint', { ranking: 'weighted-v1' }).results, result.results);
+});
+
+test('weighted-v1 falls back to all indexed documents when query postings are empty', () => {
+  const documents = [
+    { path: 'docs/a.md', text: 'Alpha.' },
+    { path: 'docs/b.md', text: 'Beta.' }
+  ];
+  const index = buildLexicalIndex(documents);
+  const weighted = searchIndexedDocuments(index, 'unindexed-token', { ranking: 'weighted-v1' });
+  const expectedComponents = { pathMatch: 0, headingMatch: 0, textMatch: 0, phraseMatch: 0, rarity: 0 };
+
+  assert.deepEqual(weighted.results.map(result => result.path), ['docs/a.md', 'docs/b.md']);
+  assert.deepEqual(weighted.results.map(result => result.score), [0, 0]);
+  assert.deepEqual(weighted.results.map(result => result.scoreComponents), [expectedComponents, expectedComponents]);
+  assert.deepEqual(searchIndexedDocuments(index, 'unindexed-token').results, []);
+});
+
+test('lexical index treats prototype property names as ordinary tokens', () => {
+  const index = buildLexicalIndex([{ path: 'docs/prototype.md', text: 'constructor prototype value' }]);
+  assert.deepEqual(searchIndexedDocuments(index, 'constructor').results.map(result => result.path), ['docs/prototype.md']);
 });
 
 test('external output requires explicit authority and refuses overwrite', t => {

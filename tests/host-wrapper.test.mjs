@@ -23,3 +23,19 @@ test('host wrapper disables auto-loaded plugins without changing them', t => {
   assert.equal(path.resolve(args[2]), path.join(root, 'src', 'index.js'));
   assert.deepEqual(args.slice(3), ['--print', 'status']);
 });
+
+test('host matrix records unavailable and qualified probes without shell interpretation', t => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'documenter-host-matrix-'));
+  t.after(() => fs.rmSync(temp, { recursive: true, force: true }));
+  const fake = path.join(temp, 'omp');
+  const output = path.join(temp, 'matrix.json');
+  fs.writeFileSync(fake, '#!/bin/sh\nif [ "$1" = "--version" ]; then printf "%s\\n" "omp 19.2.1"; else printf "%s\\n" "documenter-report"; fi\n');
+  fs.chmodSync(fake, 0o755);
+  const result = spawnSync(process.execPath, [path.join(root, 'scripts', 'omp-host-matrix.mjs'), '--command', fake, '--output', output, '--require-host'], { encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  const matrix = JSON.parse(fs.readFileSync(output, 'utf8'));
+  assert.equal(matrix.status, 'passed');
+  assert.equal(matrix.version.available, true);
+  assert.equal(matrix.load.available, true);
+  assert.match(matrix.load.args.join(' '), /--no-extensions/);
+});

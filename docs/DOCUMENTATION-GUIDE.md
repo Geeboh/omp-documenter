@@ -76,22 +76,24 @@ Parallel component reviews default to **automatic, with up to three workers plus
 
 ## Read next
 
-- [User guide](USER-GUIDE.md): installation, initial runs, maintenance, configuration and recovery.
-- [Architecture and recommendations](ARCHITECTURE.md): responsibilities, evidence model, parallel work and tradeoffs.
-- [Engine reference](ENGINE.md): exact CLI and JSON contracts.
-- [Validation and limits](VALIDATION.md): what has been checked and what needs a real OMP host.
-- [Roadmap](ROADMAP.md): useful next improvements, in priority order.
-- [Agent skill](../skills/omp-documenter/SKILL.md): the instructions OMP follows.
+- [User guide](../../docs/USER-GUIDE.md): installation, initial runs, maintenance, configuration and recovery.
+- [Architecture and recommendations](../../docs/ARCHITECTURE.md): responsibilities, evidence model, parallel work and tradeoffs.
+- [Engine reference](../../docs/ENGINE.md): exact CLI and JSON contracts.
+- [Validation and limits](../../docs/VALIDATION.md): what has been checked and what needs a real OMP host.
+- [Roadmap](../../docs/ROADMAP.md): useful next improvements, in priority order.
+- [Agent skill](../../skills/omp-documenter/SKILL.md): the instructions OMP follows.
 
 ## Compatibility and v2 lifecycle
 
 Documenter 2.0.0 requires Node.js 22 or later. The current qualification run passes 88 tests on Node.js 24.22.3 and Bun 1.4.5, including real Xberg PDF/DOCX extraction, authenticated acquisition and local Tesseract OCR.
 
-The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, `details`, and `ocr` actions. Use the repository-relative lifecycle documented in [the user guide](USER-GUIDE.md) and [the documentation-set reference](DOCUMENTATION-SET.md).
+The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, `details`, and `ocr` actions. Use the repository-relative lifecycle documented in [the user guide](../../docs/USER-GUIDE.md) and [the documentation-set reference](../../docs/DOCUMENTATION-SET.md).
 
 External output, semantic search, automatic section merging and proprietary providers remain unsupported core capabilities. PDF and DOCX style sources are qualified through pinned `@xberg-io/xberg` 1.5.4. Generic authenticated acquisition is origin-scoped and rejects login pages, redirects and rejected credentials. `tessdata_best`, visual layout fidelity and named-provider login remain unqualified.
 Local OCR uses the installed Xberg Tesseract backend. `ocr status`, `ocr doctor`, `ocr models list`, `ocr models verify` and `ocr test` expose readiness and receipts. Model downloads are not automatic.
 If another OMP plugin fails during automatic discovery, use `node scripts/omp-documenter-host.mjs` to load Documenter with automatic extensions disabled. This does not uninstall or modify other plugins.
+
+The roadmap adapters are available as deterministic local tooling. Use `node scripts/optional-capabilities.mjs graph|merge|index|search-indexed`, `node scripts/renderer-check.mjs`, `node scripts/verify-examples.mjs`, and `node scripts/omp-host-matrix.mjs` with explicit JSON inputs or paths. Indexed lexical search reports corpus invalidation; semantic search remains disabled without a measured backend. Renderer detection does not claim a renderer build until the project's command is explicitly run.
 
 ## What a passing check means
 
@@ -135,7 +137,7 @@ Documenter’s core engine has one pinned runtime dependency, `@xberg-io/xberg` 
 
 ### Prerequisites
 
-- An existing OMP installation supporting the extension interfaces listed in [validation](VALIDATION.md).
+- An existing OMP installation supporting the extension interfaces listed in [validation](../../docs/VALIDATION.md).
 - Node.js 22 or later for the supplied installer, standalone CLI and package tests.
 - Read access to the repository, and write access to the chosen documentation and state directories.
 - Git available on `PATH` when the target is a Git repository. Non-Git folders are supported with a filesystem inventory.
@@ -384,7 +386,7 @@ Exit codes:
 | `1` | Invalid input, unavailable paths, malformed state or another execution error. |
 | `2` | A check did not satisfy its criteria, or publication encountered a protected-content conflict. |
 
-See [engine reference](ENGINE.md) for `record` and `publish` payloads. Batch related review records to reduce repeated full-inventory scans.
+See [engine reference](../../docs/ENGINE.md) for `record` and `publish` payloads. Batch related review records to reduce repeated full-inventory scans.
 
 ## 10. Git workflow
 
@@ -971,11 +973,11 @@ The sync accepts explicit JSONL usage records, normalizes provider fields into i
 - Package version: 2.0.0.
 - Candidate working revision: see the workspace-only `.overhaul/documenter-v2/work/RELEASE-EVIDENCE.md`; release artifacts are generated separately and `.overhaul` is not shipped.
 - Runtime: Node.js v24.22.3 on Linux x64.
-- Runtime dependencies: Node built-ins; Git for Git-repository fixtures.
+- Runtime dependencies: Node built-ins; Git for Git-repository fixtures; repository-local Android Open Source Project Xberg fixtures under `tests/fixtures/xberg/`.
 - Automated suite: `npm test`.
-- Result: **88 tests passed; 0 failed.**
+- Result: **98 tests passed; 0 failed; 0 skipped.**
 
-The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the full suite. Local Tesseract OCR passed real raster and image-only PDF qualification. OMP 19.2.1 read/write tool qualification is partial.
+The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the current 98-test suite. Local Tesseract OCR passed real raster and image-only PDF qualification. OMP 19.2.1 read/write tool qualification is partial.
 
 ## What the automated tests establish
 
@@ -1002,6 +1004,38 @@ The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1
 
 Tests establish these observed cases, not correctness for all possible repositories or concurrent filesystem behavior.
 
+## Roadmap adapter qualification
+
+- `scripts/omp-host-matrix.mjs` passed against the installed `omp/19.2.1` executable. It records version and isolated extension-load results without shell interpretation. Missing hosts remain `unavailable` unless `--require-host` is supplied.
+- `lib/symbols.mjs` now uses Tree-sitter `0.21.1` with JavaScript `0.23.1`, Python `0.23.3` and TypeScript `0.23.2` grammars when available, with lexical fallback and explicit non-exhaustive semantic limits.
+- `lib/optional-capabilities.mjs` provides explicit dependency/impact traversal, baseline-preserving Markdown section merge receipts, and content-addressed lexical indexing with add/change/remove invalidation.
+- `lib/verification.mjs` records bounded argv-example execution receipts and detects MkDocs, Docusaurus and Sphinx configuration. Renderer execution remains explicit and unclaimed until a project command runs.
+- `.github/workflows/ci.yml` includes an `integrity` job for example receipts, renderer detection, host probing, tests and syntax checks.
+- Current documentation target is GitHub-rendered Markdown with images and local links. Full site creation and hosted renderer execution are deferred to the long-distance roadmap.
+- Semantic search remains disabled without a measured semantic backend. Indexed lexical search is the supported deterministic fallback.
+
+## Offline semantic-search baseline
+
+The repository-local baseline uses 15 documents, 10 source files, 5 Markdown pages, JavaScript, TypeScript and Python, 20 queries, top-3 retrieval and 5 repetitions. Offline mode uses no network, embeddings or external model.
+
+The starting budgets are a serialized index under 128 KiB, average query latency under 5 ms and p95 latency under 10 ms. Five runs passed with 100% expected-path recall at top 3. The index was 32,243 bytes. Median run average latency was 0.010 ms. Median p95 latency was 0.019 ms.
+
+This is a synthetic smoke baseline, not a capacity or semantic-quality claim. Evidence is in `.overhaul/documenter-v2/work/SEMANTIC-SEARCH-EVIDENCE.json`.
+
+## Real GitHub lexical ranking comparison
+
+The offline evaluator ran against three pinned GitHub repositories: `psf/requests`, `fastapi/fastapi` and `sindresorhus/p-map`. The corpus contained 3,092 text documents and 50 hand-labeled queries. Each ranking mode ran five repetitions at top 5 with no network, embeddings or external models.
+
+The overlap ranker reached 0.640 top-5 recall and 0.5377 mean reciprocal rank. Optimized `weighted-v1` reached 0.700 recall and 0.7133 mean reciprocal rank. This is a +0.060 recall gain and +0.1757 MRR gain, or +32.67% relative MRR.
+
+Median aggregate average latency was 0.268 ms for overlap and 10.825 ms for weighted-v1. Median aggregate p95 latency was 0.657 ms and 21.108 ms. Candidate scoring now uses query-token postings and avoids per-document field Set allocation, but weighted-v1 remains much slower.
+
+Overlap remains the default ranking. Weighted-v1 stays opt-in because ranking gains justify retaining a candidate, not changing the default. Evidence is in `.overhaul/documenter-v2/work/REAL-REPO-LEXICAL-EVIDENCE.json`.
+
+## Normal OMP profile qualification
+
+Normal OMP `19.2.1` status, check and initial dry-run dispatch completed without an error result. Interactive fixture attempts emitted only session and extension notices, with no model turn, tool call, approval event or worker event. Busy scheduling, approval prompts, worker execution and worker fallback remain unqualified. No unrelated OMP plugins were modified. Evidence is `.overhaul/documenter-v2/work/NORMAL-OMP-QUALIFICATION.json`.
+
 ## Independent skill exercise
 
 The skill was exercised separately against a small local JavaScript repository containing configuration code, a URL-description function, tests and pre-existing operator notes. This exercise used the standalone CLI rather than a live OMP host.
@@ -1016,7 +1050,7 @@ This small exercise is evidence that the skill can follow the workflow on a real
 
 ## OMP API evidence
 
-The adapter follows current upstream documentation for an extension factory, `omp.extensions`, conventional sibling skills, command/tool registration, injected `pi.zod`, `sendUserMessage` scheduling and `isError` results. Relevant source links are listed in [architecture](ARCHITECTURE.md#upstream-references).
+The adapter follows current upstream documentation for an extension factory, `omp.extensions`, conventional sibling skills, command/tool registration, injected `pi.zod`, `sendUserMessage` scheduling and `isError` results. Relevant source links are listed in [architecture](../../docs/ARCHITECTURE.md#upstream-references).
 
 The adapter's mock-host tests are supplemented by live OMP 19.2.1 extension loading and read/write tool invocations. An unrelated auto-loaded plugin reports an API compatibility error; busy scheduling, approval prompts, and worker fallback remain unqualified. Bun 1.4.5 is qualified for the product suite.
 The isolated OMP launcher returned public OCR `status` and `doctor` reports and a live `documenter_inspect status` tool result in JSON mode using the repository-local fixture. Normal-profile scheduling, approval prompts, worker fallback and unrelated-plugin compatibility remain partial.
@@ -1067,20 +1101,30 @@ The output path must not already exist. The build includes code, skill reference
 
 ## Implemented foundation
 
-The initial package combines a reusable OMP skill, explicit commands, automatic worker guidance, repository inventory, evidence records, coverage reporting, unknown tracking and protected whole-page publishing. Read [validation](VALIDATION.md) for actual test evidence and integration limits.
+The initial package combines a reusable OMP skill, explicit commands, automatic worker guidance, repository inventory, evidence records, coverage reporting, unknown tracking and protected whole-page publishing. Read [validation](../../docs/VALIDATION.md) for actual test evidence and integration limits.
 
-## Recommended next increments
+## Completed roadmap increments
 
-| Priority | Addition | Benefit | Acceptance evidence |
-| --- | --- | --- | --- |
-| 1 | Real OMP host compatibility matrix | Establish loading and tool behavior on named OMP versions and providers. | Initial and maintenance fixtures run in real hosts, including worker fallback. |
-| 2 | Language-aware symbol adapters | Give API coverage a meaningful denominator for supported languages. | Parser fixtures covering exported/private symbols, overloads, decorators, inheritance and dynamic limitations. |
-| 3 | Explicit dependency and impact graph | Recheck changed interfaces and their dependents while retaining proven unaffected work. | Addition, deletion, config and dynamic-dependency fixtures; conservative fallback when graph completeness is unknown. |
-| 4 | Baseline-preserving section merges | Update generated regions within human documents while preserving manual edits. | Three-way merge tests for insertions, moves, conflicts and interruption; no silent overwrite. |
-| 5 | Documentation renderer adapters | Check navigation, anchors, diagrams and generated API pages using the project's real renderer. | Builds with existing MkDocs, Docusaurus, Sphinx or equivalent configuration, without forced migration. |
-| 6 | Example-verification harness | Check executable examples in disposable, explicitly approved environments. | Recorded commands, output, exit codes, environment and revision; clear unexecuted cases. |
-| 7 | Optional CI integrity job | Detect stale citations and scope changes in pull requests. | Fails for stale claims without silently rewriting records; respects repository CI policy. |
-| 8 | Semantic search for very large repositories | Reduce repeated source retrieval where measured indexing cost is justified. | Benchmark token use, latency, missed context and index invalidation against the baseline. |
+The following increments are implemented in the current worktree. Each remains bounded by its recorded capability limits.
+
+| Priority | Addition | Status | Benefit | Acceptance evidence |
+| --- | --- | --- | --- | --- |
+| 1 | Real OMP host compatibility matrix | Complete | Probe named OMP versions and isolated extension loading without shell interpretation. | `scripts/omp-host-matrix.mjs`, live OMP 19.2.1 matrix receipt, host-wrapper tests. |
+| 2 | Language-aware symbol adapters | Complete with limits | Report stable JavaScript/TypeScript and Python declaration metadata. | Symbol tests cover exports, private names, decorators, inheritance and overload-like declarations. |
+| 3 | Explicit dependency and impact graph | Complete with conservative fallback | Recheck changed interfaces and dependents while exposing unknown dynamic/configuration edges. | Dependency graph tests cover interface edges, changes, config records and all-files fallback. |
+| 4 | Baseline-preserving section merges | Complete with limits | Merge non-overlapping generated sections while preserving current content on conflicts and interruption. | Merge tests cover anchors, moves, insertions, conflicts and interruption. |
+| 5 | Documentation renderer adapters | Complete with inspection-only execution | Detect MkDocs, Docusaurus and Sphinx configuration without claiming a renderer build. | Renderer adapter tests and `scripts/renderer-check.mjs`. |
+| 6 | Example-verification harness | Complete with limits | Execute explicit argv examples with bounded output, environment and revision receipts. | Verification tests and `.github/fixtures/documenter-examples.json`. |
+| 7 | Optional CI integrity job | Complete | Run examples, renderer detection, host probing, tests and syntax checks in CI with evidence artifacts. | `.github/workflows/ci.yml` `integrity` job. |
+| 8 | Semantic search for very large repositories | Complete as measured lexical index | Reuse content-addressed lexical indexes and report invalidation; no unmeasured embeddings. | Multi-repository overlap versus optimized weighted-v1 comparison across `psf/requests`, `fastapi/fastapi` and `sindresorhus/p-map`. |
+
+## Long-distance deferred scope
+
+Full documentation-site creation, theme selection and hosted renderer integration are deferred. Current projects primarily publish GitHub-rendered Markdown with images, local links and source references.
+
+Documenter will not force MkDocs, Docusaurus, Sphinx or another site generator into those projects. Renderer detection remains available for projects that already declare one.
+
+Reopen this scope only when a project supplies a site requirement, renderer configuration, build command, navigation policy and an authorized visual validation target.
 
 ## Keep these properties
 

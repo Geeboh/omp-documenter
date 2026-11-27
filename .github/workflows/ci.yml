@@ -32,3 +32,23 @@ jobs:
       - run: npm test
       - run: npm run check
       - run: node scripts/generate-guide.mjs --root . --output "$RUNNER_TEMP/DOCUMENTATION-GUIDE.md"
+
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: node scripts/verify-examples.mjs --input .github/fixtures/documenter-examples.json --output "$RUNNER_TEMP/documenter-examples.json"
+      - run: node scripts/renderer-check.mjs --root .
+      - run: node scripts/omp-host-matrix.mjs --output "$RUNNER_TEMP/omp-host-matrix.json"
+      - run: npm test
+      - run: npm run check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: documenter-integrity-evidence
+          path: |
+            ${{ runner.temp }}/documenter-examples.json
+            ${{ runner.temp }}/omp-host-matrix.json

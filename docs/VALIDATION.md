@@ -5,11 +5,11 @@
 - Package version: 2.0.0.
 - Candidate working revision: see the workspace-only `.overhaul/documenter-v2/work/RELEASE-EVIDENCE.md`; release artifacts are generated separately and `.overhaul` is not shipped.
 - Runtime: Node.js v24.22.3 on Linux x64.
-- Runtime dependencies: Node built-ins; Git for Git-repository fixtures.
+- Runtime dependencies: Node built-ins; Git for Git-repository fixtures; repository-local Android Open Source Project Xberg fixtures under `tests/fixtures/xberg/`.
 - Automated suite: `npm test`.
-- Result: **88 tests passed; 0 failed.**
+- Result: **98 tests passed; 0 failed; 0 skipped.**
 
-The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the full suite. Local Tesseract OCR passed real raster and image-only PDF qualification. OMP 19.2.1 read/write tool qualification is partial.
+The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the current 98-test suite. Local Tesseract OCR passed real raster and image-only PDF qualification. OMP 19.2.1 read/write tool qualification is partial.
 
 ## What the automated tests establish
 
@@ -35,6 +35,38 @@ The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1
 | Distribution | The installer reproduces every packaged file byte-for-byte, refuses existing destinations and refuses symlinked destination parents. |
 
 Tests establish these observed cases, not correctness for all possible repositories or concurrent filesystem behavior.
+
+## Roadmap adapter qualification
+
+- `scripts/omp-host-matrix.mjs` passed against the installed `omp/19.2.1` executable. It records version and isolated extension-load results without shell interpretation. Missing hosts remain `unavailable` unless `--require-host` is supplied.
+- `lib/symbols.mjs` now uses Tree-sitter `0.21.1` with JavaScript `0.23.1`, Python `0.23.3` and TypeScript `0.23.2` grammars when available, with lexical fallback and explicit non-exhaustive semantic limits.
+- `lib/optional-capabilities.mjs` provides explicit dependency/impact traversal, baseline-preserving Markdown section merge receipts, and content-addressed lexical indexing with add/change/remove invalidation.
+- `lib/verification.mjs` records bounded argv-example execution receipts and detects MkDocs, Docusaurus and Sphinx configuration. Renderer execution remains explicit and unclaimed until a project command runs.
+- `.github/workflows/ci.yml` includes an `integrity` job for example receipts, renderer detection, host probing, tests and syntax checks.
+- Current documentation target is GitHub-rendered Markdown with images and local links. Full site creation and hosted renderer execution are deferred to the long-distance roadmap.
+- Semantic search remains disabled without a measured semantic backend. Indexed lexical search is the supported deterministic fallback.
+
+## Offline semantic-search baseline
+
+The repository-local baseline uses 15 documents, 10 source files, 5 Markdown pages, JavaScript, TypeScript and Python, 20 queries, top-3 retrieval and 5 repetitions. Offline mode uses no network, embeddings or external model.
+
+The starting budgets are a serialized index under 128 KiB, average query latency under 5 ms and p95 latency under 10 ms. Five runs passed with 100% expected-path recall at top 3. The index was 32,243 bytes. Median run average latency was 0.010 ms. Median p95 latency was 0.019 ms.
+
+This is a synthetic smoke baseline, not a capacity or semantic-quality claim. Evidence is in `.overhaul/documenter-v2/work/SEMANTIC-SEARCH-EVIDENCE.json`.
+
+## Real GitHub lexical ranking comparison
+
+The offline evaluator ran against three pinned GitHub repositories: `psf/requests`, `fastapi/fastapi` and `sindresorhus/p-map`. The corpus contained 3,092 text documents and 50 hand-labeled queries. Each ranking mode ran five repetitions at top 5 with no network, embeddings or external models.
+
+The overlap ranker reached 0.640 top-5 recall and 0.5377 mean reciprocal rank. Optimized `weighted-v1` reached 0.700 recall and 0.7133 mean reciprocal rank. This is a +0.060 recall gain and +0.1757 MRR gain, or +32.67% relative MRR.
+
+Median aggregate average latency was 0.268 ms for overlap and 10.825 ms for weighted-v1. Median aggregate p95 latency was 0.657 ms and 21.108 ms. Candidate scoring now uses query-token postings and avoids per-document field Set allocation, but weighted-v1 remains much slower.
+
+Overlap remains the default ranking. Weighted-v1 stays opt-in because ranking gains justify retaining a candidate, not changing the default. Evidence is in `.overhaul/documenter-v2/work/REAL-REPO-LEXICAL-EVIDENCE.json`.
+
+## Normal OMP profile qualification
+
+Normal OMP `19.2.1` status, check and initial dry-run dispatch completed without an error result. Interactive fixture attempts emitted only session and extension notices, with no model turn, tool call, approval event or worker event. Busy scheduling, approval prompts, worker execution and worker fallback remain unqualified. No unrelated OMP plugins were modified. Evidence is `.overhaul/documenter-v2/work/NORMAL-OMP-QUALIFICATION.json`.
 
 ## Independent skill exercise
 
