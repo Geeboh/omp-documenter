@@ -5,6 +5,7 @@ VERSION='2.0.1'
 PACKAGE='omp-documenter'
 BASE_URL="${DOCUMENTER_RELEASE_BASE_URL:-https://github.com/Geeboh/omp-documenter/releases/download/v${VERSION}}"
 DEFAULT_DIR="${HOME}/.local/share/omp-documenter-${VERSION}"
+LEGACY_DIR="${HOME}/.local/share/omp-documenter-2.0.0"
 DEST="$DEFAULT_DIR"
 FRESH=0
 
@@ -47,14 +48,23 @@ command -v npm >/dev/null || { echo 'npm is required' >&2; exit 1; }
 command -v omp >/dev/null || { echo 'OMP is required' >&2; exit 1; }
 node -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)' || { echo 'Node.js 22 or later is required' >&2; exit 1; }
 
-owned_destination() {
+owned_version() {
   [[ -f "$1/package.json" ]] || return 1
-  node -e 'const p=require(process.argv[1]); if(p.name!=="omp-documenter" || p.version!==process.argv[2]) process.exit(1)' "$1/package.json" "$VERSION"
+  node -e 'const p=require(process.argv[1]); if(p.name!=="omp-documenter" || p.version!==process.argv[2]) process.exit(1)' "$1/package.json" "$2"
+}
+
+owned_destination() {
+  owned_version "$1" "$VERSION"
 }
 
 if [[ -e "$DEST" ]] && ! owned_destination "$DEST"; then
   echo "Refusing an unmanaged destination: $DEST" >&2
   exit 1
+fi
+LEGACY_SOURCE=''
+if [[ "$DEST" == "$DEFAULT_DIR" && ! -e "$DEST" && -e "$LEGACY_DIR" ]]; then
+  owned_version "$LEGACY_DIR" '2.0.0' || { echo "Refusing unmanaged legacy installation: $LEGACY_DIR" >&2; exit 1; }
+  LEGACY_SOURCE="$LEGACY_DIR"
 fi
 
 work=$(mktemp -d "${TMPDIR:-/tmp}/omp-documenter-install.XXXXXX")
@@ -67,7 +77,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if [[ -e "$DEST" && "$FRESH" == 0 ]]; then
+if [[ "$FRESH" == 0 && ( -e "$DEST" || -n "$LEGACY_SOURCE" ) ]]; then
   upgrade=1
   staging="${DEST}.staging.$$"
 elif [[ -e "$DEST" ]]; then
@@ -97,14 +107,16 @@ npm rebuild tree-sitter tree-sitter-javascript tree-sitter-python tree-sitter-ty
 
 if [[ "$upgrade" == 1 ]]; then
   cd /
-  backup="${DEST}.backup.$$"
-  mv "$DEST" "$backup"
+  old="$DEST"
+  if [[ -n "$LEGACY_SOURCE" ]]; then old="$LEGACY_SOURCE"; fi
+  backup="${old}.backup.$$"
+  mv "$old" "$backup"
   mv "$staging" "$DEST"
   staging="$DEST"
   if ! omp plugin link "$DEST"; then
     rm -rf -- "$DEST"
-    mv "$backup" "$DEST"
-    omp plugin link "$DEST" >/dev/null 2>&1 || true
+    mv "$backup" "$old"
+    omp plugin link "$old" >/dev/null 2>&1 || true
     exit 1
   fi
   rm -rf -- "$backup"
