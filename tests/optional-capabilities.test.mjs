@@ -92,6 +92,41 @@ test('indexed lexical search is deterministic, content-addressed and semantic-di
   assert.throws(() => searchDocuments(documents, 'API', { semantic: true }), /Semantic search is disabled/);
 });
 
+test('overlap ranking remains the default and explicit compatibility mode', () => {
+  const documents = [
+    { path: 'docs/api.md', text: 'Configure the API endpoint.' },
+    { path: 'docs/ops.md', text: 'Restart the worker.' }
+  ];
+  const index = buildLexicalIndex(documents);
+  const implicit = searchIndexedDocuments(index, 'API endpoint');
+  const explicit = searchIndexedDocuments(index, 'API endpoint', { ranking: 'overlap' });
+  assert.deepEqual(implicit.results, explicit.results);
+  assert.equal(implicit.results[0].score, 2);
+  assert.equal(implicit.results[0].scoreComponents, undefined);
+});
+
+test('weighted-v1 exposes field components and ranks path and heading matches', () => {
+  const documents = [
+    { path: 'reference/api.md', text: '# API endpoint\nConfigure endpoint.' },
+    { path: 'notes/general.md', text: 'API endpoint is discussed.' }
+  ];
+  const index = buildLexicalIndex(documents);
+  const indexedDocument = index.documents.find(document => document.path === 'reference/api.md');
+  assert.deepEqual(indexedDocument.pathTokens, ['reference', 'api', 'md']);
+  assert.deepEqual(indexedDocument.headingTokens, ['api', 'endpoint']);
+  assert.deepEqual(indexedDocument.textTokens, ['configure', 'endpoint']);
+  assert.equal(indexedDocument.textPresent, true);
+
+  const result = searchIndexedDocuments(index, 'API endpoint', { ranking: 'weighted-v1' });
+  const [first, second] = result.results;
+  assert.equal(result.ranking, 'weighted-v1');
+  assert.equal(first.ranking, 'weighted-v1');
+  assert.deepEqual(first.scoreComponents, { pathMatch: 3, headingMatch: 4, textMatch: 1, phraseMatch: 4, rarity: 2 });
+  assert.equal(first.score, 14);
+  assert.ok(first.score > second.score);
+  assert.deepEqual(searchDocuments(documents, 'API endpoint', { ranking: 'weighted-v1' }).results, result.results);
+});
+
 test('lexical index treats prototype property names as ordinary tokens', () => {
   const index = buildLexicalIndex([{ path: 'docs/prototype.md', text: 'constructor prototype value' }]);
   assert.deepEqual(searchIndexedDocuments(index, 'constructor').results.map(result => result.path), ['docs/prototype.md']);

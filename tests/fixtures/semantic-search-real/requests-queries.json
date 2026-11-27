@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "repository": {
+    "name": "psf/requests",
+    "url": "https://github.com/psf/requests",
+    "commit": "3c7baaa05ab4aa49cc819ce3a819d260de19c157"
+  },
+  "languages": ["Python", "reStructuredText", "Markdown"],
+  "queries": [
+    {"id": "session-cookies", "text": "session cookies persistent requests", "expectedPaths": ["src/requests/sessions.py", "docs/user/advanced.rst"]},
+    {"id": "basic-authentication", "text": "HTTP basic authentication username password", "expectedPaths": ["src/requests/auth.py", "docs/user/authentication.rst"]},
+    {"id": "digest-authentication", "text": "digest authentication challenge nonce", "expectedPaths": ["src/requests/auth.py", "docs/user/authentication.rst"]},
+    {"id": "connection-pooling", "text": "connection pooling HTTP adapter", "expectedPaths": ["src/requests/adapters.py", "docs/user/advanced.rst"]},
+    {"id": "ssl-verification", "text": "SSL certificate verification CA bundle", "expectedPaths": ["src/requests/adapters.py", "docs/user/advanced.rst"]},
+    {"id": "proxy-environment", "text": "proxy environment variables trust env", "expectedPaths": ["src/requests/utils.py", "docs/user/advanced.rst"]},
+    {"id": "request-timeout", "text": "request timeout quickstart", "expectedPaths": ["docs/user/quickstart.rst", "src/requests/api.py"]},
+    {"id": "custom-headers", "text": "custom HTTP headers request", "expectedPaths": ["docs/user/quickstart.rst", "src/requests/models.py"]},
+    {"id": "json-response", "text": "JSON response body parsing", "expectedPaths": ["docs/user/quickstart.rst", "src/requests/models.py"]},
+    {"id": "url-parameters", "text": "URL query parameters encoding", "expectedPaths": ["docs/user/quickstart.rst", "src/requests/models.py"]},
+    {"id": "cookie-jar", "text": "cookie jar domain path", "expectedPaths": ["src/requests/cookies.py", "docs/user/advanced.rst"]},
+    {"id": "request-exceptions", "text": "timeout connection error exceptions", "expectedPaths": ["src/requests/exceptions.py", "docs/api.rst"]},
+    {"id": "event-hooks", "text": "request response event hooks", "expectedPaths": ["src/requests/hooks.py", "docs/user/advanced.rst"]},
+    {"id": "prepared-request", "text": "prepared request modify headers", "expectedPaths": ["src/requests/models.py", "docs/user/advanced.rst"]},
+    {"id": "streaming-response", "text": "stream response iterate content", "expectedPaths": ["src/requests/models.py", "docs/user/advanced.rst"]},
+    {"id": "session-authentication", "text": "session authentication default headers", "expectedPaths": ["src/requests/sessions.py", "docs/user/advanced.rst"]},
+    {"id": "installation", "text": "install Requests pip virtual environment", "expectedPaths": ["docs/user/install.rst", "README.md"]},
+    {"id": "release-process", "text": "release process changelog package", "expectedPaths": ["docs/community/release-process.rst", "HISTORY.md"]},
+    {"id": "security-reporting", "text": "security vulnerability report disclosure", "expectedPaths": ["docs/community/vulnerabilities.rst", ".github/SECURITY.md"]},
+    {"id": "response-status", "text": "response status code raise error", "expectedPaths": ["src/requests/models.py", "docs/api.rst"]}
+  ],
+  "evaluation": {
+    "topK": 5,
+    "repetitions": 5,
+    "rankingModes": ["overlap", "weighted-v1"]
+  }
+}

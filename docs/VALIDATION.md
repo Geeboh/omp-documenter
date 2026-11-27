@@ -54,6 +54,14 @@ The starting budgets are a serialized index under 128 KiB, average query latency
 
 This is a synthetic smoke baseline, not a capacity or semantic-quality claim. Evidence is in `.overhaul/documenter-v2/work/SEMANTIC-SEARCH-EVIDENCE.json`.
 
+## Real GitHub lexical ranking comparison
+
+The offline evaluator ran against `psf/requests` commit `3c7baaa05ab4aa49cc819ce3a819d260de19c157`. The corpus contained 79 text documents and a 1,333,859-byte serialized index. Twenty hand-labeled queries ran five times per ranking mode at top 5.
+
+The existing overlap ranker reached 0.800 top-5 recall and 0.7392 mean reciprocal rank. The opt-in `weighted-v1` ranker reached the same 0.800 recall and improved mean reciprocal rank to 0.7583, a 2.59% relative improvement. Median average latency increased from 0.045 ms to 3.399 ms. Median p95 latency increased from 0.071 ms to 5.039 ms.
+
+The weighted ranker improved first-relevant placement, not recall. Evaluation used no network, embeddings or external models. Evidence is in `.overhaul/documenter-v2/work/REAL-REPO-LEXICAL-EVIDENCE.json`.
+
 ## Independent skill exercise
 
 The skill was exercised separately against a small local JavaScript repository containing configuration code, a URL-description function, tests and pre-existing operator notes. This exercise used the standalone CLI rather than a live OMP host.

@@ -17,7 +17,7 @@ The following increments are implemented in the current worktree. Each remains b
 | 5 | Documentation renderer adapters | Complete with inspection-only execution | Detect MkDocs, Docusaurus and Sphinx configuration without claiming a renderer build. | Renderer adapter tests and `scripts/renderer-check.mjs`. |
 | 6 | Example-verification harness | Complete with limits | Execute explicit argv examples with bounded output, environment and revision receipts. | Verification tests and `.github/fixtures/documenter-examples.json`. |
 | 7 | Optional CI integrity job | Complete | Run examples, renderer detection, host probing, tests and syntax checks in CI with evidence artifacts. | `.github/workflows/ci.yml` `integrity` job. |
-| 8 | Semantic search for very large repositories | Complete as measured lexical index | Reuse content-addressed lexical indexes and report invalidation; no unmeasured embeddings. | Indexed search tests plus the 15-document, 20-query offline baseline in `tests/fixtures/semantic-search-representative/`. |
+| 8 | Semantic search for very large repositories | Complete as measured lexical index | Reuse content-addressed lexical indexes and report invalidation; no unmeasured embeddings. | Synthetic baseline plus `psf/requests` overlap versus `weighted-v1` lexical comparison. |
 
 ## Long-distance deferred scope
 
