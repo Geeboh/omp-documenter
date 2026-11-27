@@ -60,6 +60,8 @@ The offline evaluator ran against `psf/requests` commit `3c7baaa05ab4aa49cc819ce
 
 The existing overlap ranker reached 0.800 top-5 recall and 0.7392 mean reciprocal rank. The opt-in `weighted-v1` ranker reached the same 0.800 recall and improved mean reciprocal rank to 0.7583, a 2.59% relative improvement. Median average latency increased from 0.045 ms to 3.399 ms. Median p95 latency increased from 0.071 ms to 5.039 ms.
 
+Overlap remains the default ranking. `weighted-v1` is a candidate-only mode. Optimize it only when a representative query set shows sufficient ranking gain to justify its latency and index-cost tradeoff.
+
 The weighted ranker improved first-relevant placement, not recall. Evaluation used no network, embeddings or external models. Evidence is in `.overhaul/documenter-v2/work/REAL-REPO-LEXICAL-EVIDENCE.json`.
 
 ## Independent skill exercise
