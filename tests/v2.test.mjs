@@ -68,6 +68,35 @@ test('v2 page lifecycle accepts edits then releases, renames and retires with hi
   assert.equal(state.history.length, 2);
 });
 
+test('v2 ownership migration retires legacy hashes and checks accepted v2 pages', t => {
+  const root = fixture(t);
+  put(root, '.documenter/config.json', JSON.stringify({
+    version: 1,
+    docsRoot: 'docs/documenter',
+    exclude: [],
+    maxFileBytes: 2 * 1024 * 1024,
+    gitPolicy: { branchMode: 'manual', branchPrefix: 'docs/' },
+    parallel: { mode: 'auto', maxWorkers: 3 },
+  }));
+  const page = path.join(root, 'docs/documenter/guide.md');
+  const current = fs.readFileSync(page, 'utf8');
+  put(root, '.documenter/ownership.json', JSON.stringify({
+    version: 1,
+    pages: [{ path: 'docs/documenter/guide.md', sha256: sha256('legacy'), updatedAt: new Date().toISOString() }],
+  }));
+  runOperation('plan', { root, input: { dest: 'docs/documenter', style: 'fresh' } });
+  const accepted = runOperation('page', {
+    root,
+    input: { operation: 'accept', path: 'docs/documenter/guide.md', expectedSha256: sha256(current), reason: 'Migrate reviewed page ownership.' },
+  });
+  assert.equal(accepted.ok, true);
+  assert.equal(fs.existsSync(path.join(root, '.documenter/ownership.json')), false);
+  const migrations = fs.readdirSync(path.join(root, '.documenter', 'migrations'));
+  assert.ok(migrations.some(id => fs.existsSync(path.join(root, '.documenter', 'migrations', id, 'original', 'ownership.json'))));
+  const checked = runOperation('check', { root, input: {} });
+  assert.deepEqual(checked.attention.stalePages, []);
+});
+
 test('explicit missing style source fails without selecting Fresh', t => {
   const root = fixture(t);
   assert.throws(() => runOperation('style', { root, input: { operation: 'import', source: 'missing-style.md' } }), /style source|STYLE_SOURCE_UNAVAILABLE/i);
