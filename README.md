@@ -28,6 +28,8 @@ Documentation must be clear, consistent and user friendly. Every factual explana
    /documenter initial
    ```
 
+
+For autonomous defaults, use `/documenter wizard yolo`. It still collects required operational settings in one form, records autonomous decisions as `agent-yolo`, and does not wait for approval pauses.
 5. After code changes, run the maintenance workflow:
 
    ```text

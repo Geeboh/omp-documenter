@@ -46,6 +46,23 @@ test("initial and maintenance prompt loads the exact bundled skill; idle starts,
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+
+});
+test("wizard yolo mode is explicit, autonomous and still collects required settings", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "documenter-host-wizard-yolo-"));
+  try {
+    const { captured, ctx } = host();
+    const command = captured.commands[0];
+    await command.handler("wizard yolo", ctx(dir));
+    assert.match(captured.prompts[0][0], /explicit yolo mode/);
+    assert.match(captured.prompts[0][0], /agent-yolo/);
+    assert.match(captured.prompts[0][0], /project and release material/);
+    await command.handler("wizard --yolo", ctx(dir));
+    assert.match(captured.prompts[1][0], /explicit yolo mode/);
+    await command.handler("wizard guided", ctx(dir));
+    assert.match(captured.notices[0][0], /Usage: \/documenter wizard \[yolo\]/);
+    assert.deepEqual(readdirSync(dir), []);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 test("tool root cannot escape through traversal or a directory symlink", () => {
   const dir = mkdtempSync(join(tmpdir(), "documenter-host-root-"));
   try {

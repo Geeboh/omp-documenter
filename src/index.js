@@ -19,6 +19,11 @@ export function resolveRoot(cwd, requested = ".") {
 export function workflowPrompt(mode, cwd) {
   if (!["initial", "maintain"].includes(mode)) throw new Error("Mode must be initial or maintain.");
   const skill = readFileSync(skillPath, "utf8");
+  const instruction = mode === "wizard-yolo"
+    ? "Run the wizard in explicit yolo mode. Use one HTML form to collect workflow mode (initial, maintain or overhaul), documentation destination, style and front-page choices, strict checking, and whether to update project and release material. After the form, complete the entire selected run without pausing for approval. Make unspecified choices from saved project state and the bundled skill, record autonomous decisions with actor agent-yolo, never label them as user approval, and update project or release material only when selected; preserve other human-written content."
+    : wizard
+      ? "Use one HTML form to collect workflow mode (initial, maintain or overhaul), documentation destination, style and front-page choices, strict checking, and whether to update project and release material. After the form, complete the entire selected run without pausing. Update project and release material only when selected; preserve other human-written content."
+      : "Use the bundled skill workflow for this run.";
   return [
     `Run OMP Documenter in ${mode} mode for repository ${JSON.stringify(realpathSync(cwd))}.`,
     `The bundled skill is ${JSON.stringify(skillPath)}. Resolve its reference links relative to that file.`,

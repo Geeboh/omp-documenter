@@ -114,6 +114,8 @@ Documenter should continue through the following work without pausing merely bec
 9. Check links, freshness, coverage, clarity and unresolved issues.
 10. Report the outcome and the exact remaining gaps.
 
+For autonomous defaults, run `/documenter wizard yolo`. It keeps the required settings form, records unspecified choices with actor `agent-yolo`, and does not wait for approval pauses. This mode does not expand the requested scope or treat autonomous decisions as user approval.
+
 ### Default chapter structure
 
 The skill adapts these chapters to the project. It should avoid empty chapters and explain when a topic is not applicable.

@@ -1,5 +1,7 @@
 # Changelog
 
+- Added explicit `/documenter wizard yolo` mode with agent-owned defaults and no approval pauses.
+
 ## 2.0.2 — 28 November 2026
 
 - Fixed upgrade migration from the owned 2.0.1 installation directory.
