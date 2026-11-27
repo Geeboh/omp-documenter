@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "languages": ["JavaScript", "TypeScript", "Python"],
+  "documents": [
+    {"path": "src/auth/session.js", "kind": "source", "language": "JavaScript"},
+    {"path": "src/auth/token.ts", "kind": "source", "language": "TypeScript"},
+    {"path": "src/api/client.js", "kind": "source", "language": "JavaScript"},
+    {"path": "src/api/retry.ts", "kind": "source", "language": "TypeScript"},
+    {"path": "src/config/settings.py", "kind": "source", "language": "Python"},
+    {"path": "src/jobs/worker.py", "kind": "source", "language": "Python"},
+    {"path": "src/cache/redis.ts", "kind": "source", "language": "TypeScript"},
+    {"path": "src/persistence/repository.py", "kind": "source", "language": "Python"},
+    {"path": "src/cli/commands.js", "kind": "source", "language": "JavaScript"},
+    {"path": "src/recovery/reconciler.py", "kind": "source", "language": "Python"},
+    {"path": "docs/authentication.md", "kind": "markdown"},
+    {"path": "docs/api-client.md", "kind": "markdown"},
+    {"path": "docs/configuration.md", "kind": "markdown"},
+    {"path": "docs/operations.md", "kind": "markdown"},
+    {"path": "docs/recovery.md", "kind": "markdown"}
+  ],
+  "queries": [
+    {"id": "auth-session-revocation", "text": "cookie revocation session", "expectedPaths": ["src/auth/session.js", "docs/authentication.md"]},
+    {"id": "auth-token-claims", "text": "bearer issuer audience claims", "expectedPaths": ["src/auth/token.ts", "docs/authentication.md"]},
+    {"id": "auth-refresh-expiry", "text": "refresh rotation expiry", "expectedPaths": ["src/auth/session.js", "docs/authentication.md"]},
+    {"id": "api-endpoint-timeout", "text": "API endpoint timeout headers", "expectedPaths": ["src/api/client.js", "docs/api-client.md"]},
+    {"id": "api-json-idempotency", "text": "JSON idempotency request", "expectedPaths": ["src/api/client.js", "docs/api-client.md"]},
+    {"id": "api-retry-backoff", "text": "retry backoff jitter 429", "expectedPaths": ["src/api/retry.ts", "docs/api-client.md"]},
+    {"id": "config-environment", "text": "environment configuration variables", "expectedPaths": ["src/config/settings.py", "docs/configuration.md"]},
+    {"id": "cache-redis-ttl", "text": "redis cache ttl stale", "expectedPaths": ["src/cache/redis.ts"]},
+    {"id": "cache-invalidation-key", "text": "cache invalidation key", "expectedPaths": ["src/cache/redis.ts"]},
+    {"id": "jobs-heartbeat-lease", "text": "queue worker heartbeat lease", "expectedPaths": ["src/jobs/worker.py", "docs/operations.md"]},
+    {"id": "jobs-dead-letter", "text": "dead-letter job queue", "expectedPaths": ["src/jobs/worker.py", "docs/operations.md"]},
+    {"id": "persistence-sqlite", "text": "sqlite transaction migration rollback", "expectedPaths": ["src/persistence/repository.py"]},
+    {"id": "persistence-repository", "text": "persistence repository transaction", "expectedPaths": ["src/persistence/repository.py"]},
+    {"id": "cli-dry-run", "text": "CLI dry-run migrate", "expectedPaths": ["src/cli/commands.js", "docs/operations.md"]},
+    {"id": "cli-doctor", "text": "CLI doctor restart", "expectedPaths": ["src/cli/commands.js", "docs/operations.md"]},
+    {"id": "recovery-checkpoint", "text": "checkpoint replay compensation", "expectedPaths": ["src/recovery/reconciler.py", "docs/recovery.md"]},
+    {"id": "recovery-runbook", "text": "failure recovery resume runbook", "expectedPaths": ["src/recovery/reconciler.py", "docs/recovery.md"]},
+    {"id": "operations-restart", "text": "production operations restart", "expectedPaths": ["docs/operations.md"]},
+    {"id": "api-authentication", "text": "API authentication bearer", "expectedPaths": ["docs/authentication.md", "src/auth/token.ts"]},
+    {"id": "config-persistence", "text": "database configuration persistence", "expectedPaths": ["src/config/settings.py", "src/persistence/repository.py", "docs/configuration.md"]}
+  ],
+  "evaluation": {
+    "topK": 3,
+    "repetitions": 5,
+    "budgets": {
+      "serializedIndexBytes": 131072,
+      "averageQueryLatencyMs": 5,
+      "p95QueryLatencyMs": 10
+    }
+  }
+}

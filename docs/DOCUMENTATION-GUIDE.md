@@ -975,9 +975,9 @@ The sync accepts explicit JSONL usage records, normalizes provider fields into i
 - Runtime: Node.js v24.22.3 on Linux x64.
 - Runtime dependencies: Node built-ins; Git for Git-repository fixtures; repository-local Android Open Source Project Xberg fixtures under `tests/fixtures/xberg/`.
 - Automated suite: `npm test`.
-- Result: **96 tests passed; 0 failed; 0 skipped.**
+- Result: **98 tests passed; 0 failed; 0 skipped.**
 
-The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the earlier v2 suite; Bun is unavailable in the current shell for a post-roadmap rerun. Local Tesseract OCR passed real raster and image-only PDF qualification. OMP 19.2.1 read/write tool qualification is partial.
+The release target is Node.js 22 or later. Node.js 22.23.5, 24.22.3, and 26.13.1 passed the product suite and syntax checks. Bun 1.4.5 passed the current 98-test suite. Local Tesseract OCR passed real raster and image-only PDF qualification. OMP 19.2.1 read/write tool qualification is partial.
 
 ## What the automated tests establish
 
@@ -1013,6 +1013,14 @@ Tests establish these observed cases, not correctness for all possible repositor
 - `.github/workflows/ci.yml` includes an `integrity` job for example receipts, renderer detection, host probing, tests and syntax checks.
 - Current documentation target is GitHub-rendered Markdown with images and local links. Full site creation and hosted renderer execution are deferred to the long-distance roadmap.
 - Semantic search remains disabled without a measured semantic backend. Indexed lexical search is the supported deterministic fallback.
+
+## Offline semantic-search baseline
+
+The repository-local baseline uses 15 documents, 10 source files, 5 Markdown pages, JavaScript, TypeScript and Python, 20 queries, top-3 retrieval and 5 repetitions. Offline mode uses no network, embeddings or external model.
+
+The starting budgets are a serialized index under 128 KiB, average query latency under 5 ms and p95 latency under 10 ms. Five runs passed with 100% expected-path recall at top 3. The index was 32,243 bytes. Median run average latency was 0.010 ms. Median p95 latency was 0.019 ms.
+
+This is a synthetic smoke baseline, not a capacity or semantic-quality claim. Evidence is in `.overhaul/documenter-v2/work/SEMANTIC-SEARCH-EVIDENCE.json`.
 
 ## Independent skill exercise
 
@@ -1094,7 +1102,7 @@ The following increments are implemented in the current worktree. Each remains b
 | 5 | Documentation renderer adapters | Complete with inspection-only execution | Detect MkDocs, Docusaurus and Sphinx configuration without claiming a renderer build. | Renderer adapter tests and `scripts/renderer-check.mjs`. |
 | 6 | Example-verification harness | Complete with limits | Execute explicit argv examples with bounded output, environment and revision receipts. | Verification tests and `.github/fixtures/documenter-examples.json`. |
 | 7 | Optional CI integrity job | Complete | Run examples, renderer detection, host probing, tests and syntax checks in CI with evidence artifacts. | `.github/workflows/ci.yml` `integrity` job. |
-| 8 | Semantic search for very large repositories | Complete as measured lexical index | Reuse content-addressed lexical indexes and report invalidation; no unmeasured embeddings. | Indexed search tests cover digest reuse, add/change/remove invalidation and semantic-disabled results. |
+| 8 | Semantic search for very large repositories | Complete as measured lexical index | Reuse content-addressed lexical indexes and report invalidation; no unmeasured embeddings. | Indexed search tests plus the 15-document, 20-query offline baseline in `tests/fixtures/semantic-search-representative/`. |
 
 ## Long-distance deferred scope
 

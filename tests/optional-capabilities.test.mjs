@@ -92,6 +92,11 @@ test('indexed lexical search is deterministic, content-addressed and semantic-di
   assert.throws(() => searchDocuments(documents, 'API', { semantic: true }), /Semantic search is disabled/);
 });
 
+test('lexical index treats prototype property names as ordinary tokens', () => {
+  const index = buildLexicalIndex([{ path: 'docs/prototype.md', text: 'constructor prototype value' }]);
+  assert.deepEqual(searchIndexedDocuments(index, 'constructor').results.map(result => result.path), ['docs/prototype.md']);
+});
+
 test('external output requires explicit authority and refuses overwrite', t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'documenter-external-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
