@@ -36,6 +36,26 @@ Documentation must be clear, consistent and user friendly. Every factual explana
 
 The directory passed to `plugin link` must remain available. For a single session, load the package directory with `omp --extension /absolute/path/to/omp-documenter` instead.
 
+## Release install and uninstall
+
+Download the release wrappers. The install wrapper verifies the installer checksum, installs or upgrades an owned directory, approves only the four pinned Tree-sitter native scripts, rebuilds them, and links the package.
+
+```bash
+curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.1/omp-documenter-install.sh
+chmod +x omp-documenter-install.sh
+./omp-documenter-install.sh
+```
+
+Upgrade the existing default installation with the same command. Use `--fresh` only when replacing it deliberately. Use `--dir /absolute/path` for another installation location.
+
+Uninstall without touching project `.documenter` state:
+
+```bash
+curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.1/omp-documenter-uninstall.sh
+chmod +x omp-documenter-uninstall.sh
+./omp-documenter-uninstall.sh
+```
+
 ## What is included
 
 | Part | Purpose |
@@ -70,7 +90,7 @@ Parallel component reviews default to **automatic, with up to three workers plus
 
 ## Compatibility and v2 lifecycle
 
-Documenter 2.0.0 requires Node.js 22 or later. The current qualification run passes 88 tests on Node.js 24.22.3 and Bun 1.4.5, including real Xberg PDF/DOCX extraction, authenticated acquisition and local Tesseract OCR.
+Documenter 2.0.1 requires Node.js 22 or later. The current qualification run passes 105 tests on Node.js 24.22.3 and Bun 1.4.5, including real Xberg PDF/DOCX extraction, Tree-sitter symbol graphs, offline ranking evaluation and local Tesseract OCR.
 
 The v2 engine retains `scan`, `status`, `record`, `publish`, and `check`. It adds guarded `preview`, `plan`, `overhaul`, `archive`, `stage`, `validate`, `promote`, `resume`, `archives`, `restore`, `page`, `style`, `doctor`, `details`, and `ocr` actions. Use the repository-relative lifecycle documented in [the user guide](docs/USER-GUIDE.md) and [the documentation-set reference](docs/DOCUMENTATION-SET.md).
 

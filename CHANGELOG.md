@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.1 — 28 November 2026
+
+- Added upgrade-safe install and uninstall wrappers.
+- Approved only pinned Tree-sitter native install scripts before rebuilding dependencies, avoiding npm 11 `allowScripts` warnings and incomplete parser bindings.
+
 ## 2.0.0 — 26 November 2026
 
 - Added repository-relative documentation sets, remembered destinations, exact front-page policies, and guarded overhaul lifecycle actions.

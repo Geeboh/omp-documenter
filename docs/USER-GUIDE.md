@@ -47,29 +47,27 @@ omp --version
 git --version
 ```
 
-### Install from the self-contained installer
+### Install or upgrade from the release wrappers
 
-The distribution includes `omp-documenter-2.0.0-install.mjs`. It contains the package files and their hashes. It writes to a new directory, verifies the contents, and does not contact the network or change OMP settings.
-
-Run this from the directory where you downloaded the installer:
+Download `omp-documenter-install.sh` and `omp-documenter-uninstall.sh` from the `v2.0.1` release. The install wrapper verifies the installer checksum, installs or upgrades an owned directory, performs a no-script dependency install, approves only the pinned Tree-sitter packages, rebuilds native bindings, and links OMP.
 
 ```bash
-node ./omp-documenter-2.0.0-install.mjs "$HOME/.local/share/omp-documenter-2.0.0"
+curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.1/omp-documenter-install.sh
+chmod +x omp-documenter-install.sh
+./omp-documenter-install.sh
 ```
 
-After installation, install the pinned runtime dependency before linking:
+Run the same command to upgrade the default installation. Use `--fresh` only for deliberate replacement. Use `--dir /absolute/path` for another location.
+
+Uninstall the package without touching project `.documenter` state:
 
 ```bash
-cd "$HOME/.local/share/omp-documenter-2.0.0"
-npm install --omit=dev
+curl -fLO https://github.com/Geeboh/omp-documenter/releases/download/v2.0.1/omp-documenter-uninstall.sh
+chmod +x omp-documenter-uninstall.sh
+./omp-documenter-uninstall.sh
 ```
 
-
-Link the package to OMP:
-
-```bash
-omp plugin link "$HOME/.local/share/omp-documenter-2.0.0"
-```
+For manual installation, use the self-contained `omp-documenter-2.0.1-install.mjs`, then run `npm install --omit=dev --ignore-scripts`, approve the four pinned Tree-sitter packages with `npm install-scripts approve`, run `npm rebuild`, and link with `omp plugin link`.
 
 Start a new OMP session from the repository root:
 
@@ -86,7 +84,7 @@ If you do not want a persistent plugin link, load the entire package directory f
 
 ```bash
 cd /path/to/your/project
-omp --extension "$HOME/.local/share/omp-documenter-2.0.0"
+omp --extension "$HOME/.local/share/omp-documenter-2.0.1"
 ```
 
 Use the package directory so OMP can discover the bundled skill. Loading only `src/index.js` is not the recommended installation method.
