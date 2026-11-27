@@ -66,7 +66,7 @@ Overlap remains the default ranking. Weighted-v1 stays opt-in because ranking ga
 
 ## Normal OMP profile qualification
 
-Normal OMP `19.2.1` status, check and initial dry-run dispatch completed without an error result. Busy scheduling, approval prompts, worker execution and worker fallback remain unqualified. No unrelated OMP plugins were modified. Evidence is `.overhaul/documenter-v2/work/NORMAL-OMP-QUALIFICATION.json`.
+Normal OMP `19.2.1` status, check and initial dry-run dispatch completed without an error result. Interactive fixture attempts emitted only session and extension notices, with no model turn, tool call, approval event or worker event. Busy scheduling, approval prompts, worker execution and worker fallback remain unqualified. No unrelated OMP plugins were modified. Evidence is `.overhaul/documenter-v2/work/NORMAL-OMP-QUALIFICATION.json`.
 
 ## Independent skill exercise
 
